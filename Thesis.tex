@@ -1,0 +1,1710 @@
+\documentclass[a4paper,12pt]{report}
+
+\usepackage{iitbtitle}
+\usepackage{a4wide}
+\usepackage{anysize}
+\usepackage{iitbcs}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{epsfig}
+\usepackage{tabls}
+%\usepackage[dvips]{color}
+\usepackage{graphicx}
+\usepackage{tikz,anysize}
+\usepackage{float}
+\usepackage{verbatim}
+\marginsize{2.5cm}{2.5cm}{1cm}{1.5cm}
+\def\baselinestretch{1.15}  
+\usepackage{url}                        
+\usepackage{multirow}
+\usepackage{epigraph}
+\usepackage{amsmath}
+
+\newcommand\INPUT{\item[\textbf{Input:}]}
+\newcommand\OUTPUT{\item[\textbf{Output:}]}
+\usepackage{algorithm}% http://ctan.org/pkg/algorithms
+\usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
+
+
+%theorum lemma environment 
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\hfill $\square$\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\qed}{\nobreak \ifvmode \relax \else
+      \ifdim\lastskip<1.5em \hskip-\lastskip
+      \hskip1.5em plus0em minus0.5em \fi \nobreak
+      \vrule height0.75em width0.5em depth0.25em\fi}
+
+
+
+\begin{document}
+
+%\baselineskip 20pt
+%The definitions
+\def\title{Word Sense Induction, Disambiguation for Search Result organization }
+\def\what{M. Tech. Thesis}
+\def\degree{Master~of~Technology}
+\def\who{Rakesh Dhanireddy}
+\def\roll{10305069}
+\def\guide{Prof. Ganesh Ramakrishnan, Prof. Saketha Nath}
+
+\titlpage
+\def\bsq{\begin{flushright} $\blacksquare$\\ \end{flushright}}
+\def\tab{\hspace{5mm}}
+
+%The stuff
+\pagenumbering{roman}
+ 
+\newpage
+
+\begin{center}
+ \textbf{Declaration}
+\end{center}
+I declare that this written submission represents my ideas in my own
+words and where others ideas or words have been included, I have
+adequately cited and referenced the original sources. I also declare
+that I have adhered to all principles of academic honesty and
+integrity and have not misinterpreted or fabricated or falsified any
+idea/data/source in my submission. I understand that any violation of
+the above will call for disciplinary action by the institute and can
+also evoke penal action from the sources which have thus not been
+property cited or from whom proper permission has not been taken when
+needed.
+   \vspace{1cm}
+ \begin{flushright}
+ \rule{150pt}{1pt}\\ 
+ 
+ Signature\\
+ \vspace{1cm}
+ \rule{150pt}{1pt} \\
+ 
+ Name\\
+ \vspace{1cm}
+ \rule{150pt}{1pt} \\
+ 
+ Roll Number\\
+ 
+ \end{flushright}
+ 
+ \begin{flushleft}
+ Date: \rule{150pt}{1pt} \\
+ \vspace{1cm}
+  
+ Place: \rule{150pt}{1pt} \\
+ \end{flushleft}
+
+
+
+
+
+\newpage
+
+
+\begin{abstract}
+The tasks of Word Sense Disambiguation / Induction are broadly defined
+as computational determination of the particular ``sense'' implied by
+the usage of a given word in a given context. Due to the simplicity of
+the problem statement and straight forward methods of evaluation,
+these tasks have been subject to intense research activity which
+resulted in the development of a number of techniques to tackle them
+with respectable success. Despite their theoretical importance, there
+has not been much progress by way of adopting these techniques in real
+applications. In this thesis we apply these methods and evaluate their
+efficacy in the context of Information Retrieval. We apply
+disambiguation techniques to the problem of organizing the search
+engine results by associating each of them to semantically meaningful
+topics, which helps the user of the search engine quickly identify and
+reach the Search Results corresponding to the particular sense of the
+query he is interested in. We studied diverse approaches in tackling
+this problem -- those which don't use any external knowledge source,
+those which use raw knowledge in the form or corpora, those which use
+organized knowledge sources like Wikipedia. We discuss the Wikipedia
+based systems in depth as they have not been as thoroughly studied as
+the others in the literature surveys. In particular we study the
+effect of exploiting the information mined from Wikipedia article
+abstracts, Category structure and the Network structure of the links
+between Wikipedia articles.
+\end{abstract}
+
+
+\newpage
+\listoffigures
+\listoftables
+
+
+\newpage
+
+\begingroup\def\thispagestyle#1{}\def\baselinestretch{1.5}\tableofcontents\endgroup    
+\newpage
+\pagenumbering{arabic}
+\chapter{Introduction}
+A significant percentage of words in all natural languages have always
+had multiple senses. Given an instance of the usage of one of such
+ambiguous words, Humans are able to infer the exact sense meant to be
+conveyed by the word. Thus in order to effectively communicate with
+Humans in natural language, it is imperative for the machines to
+possess the analogous ability of `disambiguation' of words. Thus Word
+Sense Disambiguation (WSD) was identified as an important problem in
+Natural Language Processing research community resulting in the
+development of a diverse range of methods of tackling the
+problem. However the efforts to embed these methods as independent
+modules of real world applications ({\it in vivo}), which require
+natural language interfaces, have not been as popularly successful as
+the stand alone ({\it in vitro}) task of disambiguation. Moreover, the
+prevalent consensus among the researchers in this area is that the
+performance of the {\it in vitro} systems has reached a plateau. The
+results of the top performing systems in the {\bf Senseval-3} lexical
+sample task had little difference.\cite{chap4WSD} Hence the problem of
+adopting these {\it in vitro} techniques into a real world system now
+assumes greater significance.
+
+In the light of above observations, in our project, we attempted to
+apply the WSD techniques to the real world problem of organizing the
+search results of a given ambiguous query. This makes it easier for
+the user to quickly reach the search results (websites) corresponding
+to the topic or `sense' intended by him. Studies indicate that around
+$3\%$ of Web queries and $23\%$ of most frequent queries involve
+ambiguous terms\cite{miller}. Hence solving this problem effectively
+is important for the performance of information retrieval systems.
+\section{Organization of the report}
+We discuss the motivation and definition of the problem statement and
+briefly describe the different variants of solution in chapter 2. In
+chapter 3 we discuss the algorithms and implementation details of the
+various approaches. In chapter 4 we discuss the evaluation methodologies
+and state the results of evaluation of our implementations. In chapter
+5 we conclude by discussing the results and our conclusions.
+
+
+\chapter{Problem Statement}
+\section{Formal Statement}
+We adopted the formal statement of the task ``Word Sense Induction and
+Disambiguation with an end-user application'' posed in {\bf
+  SemEval-2013} as our problem statement. SemEval ({\bf Sem}antic
+{\bf Eval}uation) is an yearly event of evaluations of computational
+semantic analysis systems; it evolved from the Senseval word sense
+evaluation series. The formal statement of task-11 which we attempted to solve
+is as follows: 
+
+``Given an ambiguous query and the list of top hundred search result
+snippets (obtained from search engines like Google), the aim of the
+task is to produce a clustering of snippets such that all the results
+belonging to a particular cluster are related to the same `sense'. The
+clustering thus obtained is tested against a `gold-standard'
+clustering which is obtained by manually assigning each search snippet
+to a particular sense by a group of volunteers. Snippets grouped under
+the same sense form the gold-standard clusters.''
+
+\section{Various solution approaches}
+We now present a high-level classification framework for the various
+methods used in the literature and the new methods we implemented that
+can be used for attacking this task. It also indicates possible
+combinations of ideas which might improve upon the performance of
+the implemented systems.
+
+The graph depicting this classification is as shown in Figure~\ref{fig:classify}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.5]{graph.pdf}
+  \caption{Classification of the clustering methods}
+  \label{fig:classify}
+\end{figure}
+
+As stated in the introduction, the aim of this project is to find a
+real world application for exploiting the techniques developed in the
+context of the traditional WSD/WSI({\it in vitro} task). As depicted
+in the Figure~\ref{fig:classify}, basic approaches to the problem of
+search result organization can be broadly categorized as:
+\begin{itemize}
+  \item {\it Self Contained}
+  \item {\it Knowledge Based}
+\end{itemize}
+
+\subsection{Self Contained systems}
+
+{\it Self Contained} systems take the snippets as input and organize
+them into various meaningful clusters with the help of syntactical
+features extracted from the snippets as their only guide. They don't
+need any prior knowledge concerning the subjects of the snippets or
+the query. Almost all of the systems in the literature which attempted
+to solve this problem in the late 90s and early 2000s belong to this
+category. The primary advantage of these systems being that they are
+designed to be efficient keeping in mind the response times expected
+of search engines. Given that the amount of data to be processed by
+these systems (typically of the order of the first few 100s of
+snippets) is small, they can be easily made to fulfill the efficiency
+constraints. 
+
+These systems can further be classified into following classes:
+\begin{itemize}
+  \item Classical clustering methods 
+  \item Suffix tree based methods
+  \item Document summarization methods
+\end{itemize}
+
+{\it Classical clustering methods} adopt the well known clustering
+algorithms like K-Means clustering, Bisecting K-Means, Agglomerative
+Hierarchical clustering to the snippet clustering problem. These serve
+as the baseline systems against which to compare the performance of
+more sophisticated systems. In our thesis, we discuss the Bisecting
+K-Means algorithm (which is the best performing among these)
+\cite{clusteringCompare} and its results on the test dataset.
+
+{\t Suffix tree methods} were first proposed in \cite{Zamir} and were
+shown to improve the performance by significant measure compared to
+the classical clustering algorithms. These systems typically extract
+most frequent phrases among all the snippets (using Suffix tree
+data structure for speed) and clusters the snippets based on the
+occurrence of phrases. Lingo algorithm further improves upon this idea
+by employing Singular Value Decomposition (SVD) to extract meaningful
+`topics' from the snippets.\cite{Weiss} We discuss the implementation
+and performance details of the Lingo algorithm on our test dataset.
+
+Finally we discuss {\it Document summarization} techniques which have
+been originally proposed to solve the problem of providing a useful
+summary of long documents. We suggest that these can be adapted to the
+problem of search result organizing by concatenating all the snippets
+to form a single document and applying summarization techniques on
+it. We implemented a system based on submodular functions\cite{Bilmes}
+and evaluate the results obtained on the test dataset.
+
+
+\subsection{Knowledge based systems}
+
+Self contained systems discussed so far have one primary disadvantage
+-- they use purely syntactic features {\it ie} words of an ambiguous
+natural language like English. The systems have no clue of the
+background knowledge that humans extensively use in tackling these
+kind of problems. For example, consider the following two snippets:
+
+\begin{itemize}
+  \item \begin{verbatim}The official Twitter page of Guy Kawasaki. Follow for
+    live updates!\end{verbatim}
+  \item \begin{verbatim}The official Twitter page of Kawasaki Motors. Follow for
+    live updates! \end{verbatim}
+\end{itemize}
+
+The methods which rely on syntactic similarity are highly likely to
+group these two snippets under a single cluster as their inter-snippet
+similarity is very high even if they are talking about completely
+unrelated entities.
+
+Thus we can see that there is a scope for improvement in the
+performance of clustering systems if they can be made to `know' what
+entities the snippets are talking about. Given the lack of a universal
+repository of knowledge of various entities, scarce computing power in
+the late 90s, Self Contained systems attracted the most attention of
+researchers. Now that the computing power has improved exponentially
+and accurate knowledge repositories like Wikipedia have proliferated
+in the past decade, there is no reason to limit ourselves to syntactic
+similarity. Hence we devote a significant part of our thesis to
+exploring the effect of incorporating external knowledge into these
+snippet clustering systems. We now discuss the various methods we
+tried to extract and exploit the knowledge from various sources to
+improve the clustering performance.
+
+WSI/WSD systems can be classified into two categories, based
+on the type of `knowledge' used:
+\begin{itemize}
+  \item {\it Organized Knowledge or `Ontology' based methods}
+  \item {\it Raw Corpus based methods (unsupervised)}
+\end{itemize}
+
+Organized knowledge based methods depend upon manually compiled
+`dictionaries' or other analogous knowledge sources like `ontologies'
+to retrieve the various senses corresponding to an ambiguous query and
+try to choose a particular sense among them which best fits a given
+context. Most of the WSD methods which use Wordnet fall under this
+category.
+
+On the other hand Unsupervised methods try to infer the sense of an
+ambiguous word by clustering the word co-occurrences in different
+contexts, in a large corpus. Different clusters correspond to
+different senses of the word. Any cluster of words is understood to
+imply a particular `sense' of the word.
+
+For our problem of organizing search results, we have discuss two
+solutions corresponding to each of the above two categories --
+Ontology based and Corpus based, which we discuss below. 
+
+The basic skeleton of the methods used in the two approaches is shown
+in the following diagram. The green box in the diagram represents a
+`Knowledge source' which can either be an Ontology or a Corpus in our
+methods. 
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.3]{Blockdia.pdf}
+  \caption{Block diagram of the clustering methods}
+\end{figure}
+\subsubsection{Wikipedia based methods (Ontology based)}
+For a system to be able to disambiguate terms, it must possess the
+prior knowledge of all the senses in which those terms are used. WSD
+systems have typically used Wordnet or other manually compiled
+dictionaries as Knowledge Sources for the senses. In the context of
+our problem of query disambiguation, it is easily recognized that
+these dictionaries are inadequate primarily due to two reasons:
+\begin{itemize}
+  \item Static nature of the dictionary -- whereas web queries are
+    essentially dynamic with new terms and phrases being coined
+    virtually everyday.
+  \item Paucity of Proper Nouns in the dictionary -- A high percentage
+    of web queries are proper nouns {\it ie.} names of places, persons
+    and things. Clearly the conventional dictionaries are lacking in
+    such entities.
+\end{itemize}
+
+From the above analysis it is clear that we need a Knowledge
+Source which is dynamic ({\it ie.} being updated regularly) as well as
+containing extensive information about all known {\it entities} and
+their relationships. In other words we need a {\it Dynamic Ontology}
+capturing all the information about the world. An encyclopedia fits
+this role very well. Wikipedia is a free Online encyclopedia
+containing over $4$ million articles (English) with hundreds of new
+articles being added everyday. Thus it meets our requirements of being
+dynamic as well as being extensive in terms of number of entities. 
+
+We use DBPedia -- an ontology compiled by mining information from
+Wikipedia as the Knowledge Sources of our system for disambiguating
+queries. Given an ambiguous query term, our baseline method retrieves
+the various entities denoted by the query and the information
+associated with them. For a given search result snippet, the system
+computes the `similarity' of the snippet to each of the entities and
+chooses the entity with maximum similarity. The formal definition and
+details of these computations are discussed in Chapter 3. Thus we are
+able to associate each result snippet to a known entity from the
+ontology. We can now form clusters of result snippets by grouping all
+the snippets mapped to a single entity. Representing this procedure in
+our block diagram - Figure~\ref{fig:OntClust}
+
+Improving upon the baseline method, we implemented two different
+algorithms which exploit two important datasets of DBPedia:
+\begin{itemize}
+  \item Category hierarchy structure
+  \item Internal link structure
+\end{itemize}
+
+The {\it Category hierarchy} system exploits the `Category' to which a
+given entity belongs. For example by realizing the Wikipedia entity
+\verb|Pluto_(Disney)| has the category \verb|Fictional_dogs| we are more
+likely to correctly assign a snippet talking about Pluto the dog to
+\verb|Pluto_(Disney)| rather than \verb|Pluto| the planet.
+
+Similarly the system based on {\it Internal link structure} of
+Wikipedia learns to dissociate ambiguously named entities in the
+snippet by representing each snippet as a bag of Wiki entities and
+exploiting the network properties of the links among those entities.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.35]{block_ont.pdf}
+  \caption{Block diagram of the Ontological clustering method}
+  \label{fig:OntClust}
+\end{figure}
+
+\subsubsection{Word Sense Induction method (Corpus based)}
+
+\epigraph{{\it You shall know a word by the company it keeps}}{John Rupert Firth}
+
+Corpus based methods, as indicated by the name, extract all their
+knowledge from the raw corpus of documents. Dictionaries are supposed
+to be the universal authorities on word senses. However, if we examine
+how lexicographers themselves arrive at the word senses, we find that
+dictionaries are written on the basis of evidence from language
+corpora. Thus one is tempted to consider whether using the corpora
+directly to determine the senses might be more effective than using a
+dictionary. This line of thinking led to the development of Word Sense
+Induction (WSI) methods. One obvious advantage is that the static
+nature of the definitions in a dictionary is avoided by this approach.
+
+WSI algorithms are unsupervised techniques which seek to discover (or
+{\it induce}) various senses denoted by a word with the help of the
+information extracted from the various contexts the word occurs in the
+corpus. The central assumption of these methods is that a given word,
+in a specific sense, tends to co-occur with the same neighboring
+words. We use a WSI method based on \cite{navigli} which involves
+constructing a {\it co-occurrence graph} of words. The graph is
+constructed based on the frequencies of {\it ngrams} of a huge
+corpus. (For our experiments we used the freely available Google Books
+Ngrams.) Based on the frequencies of the co-occurrence of words in
+{\it ngrams} the algorithm tries to locate distinct {\it hubs} in the
+graph corresponding to distinct senses. Thus given a search query, the
+algorithm extracts various hubs from the graph representing various
+senses of the query. For each search result snippet, we assign the hub
+which has greatest similarity. Further details of the algorithm are
+discussed in the next Chapter. Representing the whole procedure as a
+block diagram, we have:
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.3]{block_ngram.pdf}
+  \caption{Block diagram of Corpus based clustering method}
+\end{figure}
+
+\chapter{Algorithms and Implementation details}
+
+In this section, we give the detailed description of the algorithms we
+mentioned in the previous section. For each approach in turn, we
+detail the step-by-step algorithm, tools and packages used and
+variations implemented.
+
+\section{Ontology based methods}
+As described in the outline in Chapter 2, we use a manually compiled
+knowledge source -- an ontology, as a source for retrieving various
+senses corresponding to a given query term. An ontology formally
+represents knowledge as a set of concepts within a domain, and the
+relationships among those concepts. It can be used to reason about the
+entities within that domain and may be used to describe the domain. We
+have implemented various versions of algorithms each using a different
+component of the ontology DBPedia\cite{dbpedia} acting as the
+knowledge source. We first describe the baseline version completely and
+then proceed to describe more advanced methods which improve upon it.
+
+\subsection{Baseline classification of search results}
+\subsubsection{Introduction to DBPedia}
+DBPedia has been developed to cater to the widespread need for
+ontological background knowledge in a variety of modern information
+applications such as Semantic Web, machine translation, WSD, query
+expansion, document classification. It is an automatically constructed
+knowledge base with information mined from Wikipedia. Each article in
+Wikipedia corresponds to an {\it entity} in DBPedia. Any two entities in
+the knowledge base can form a {\it relation}. Each fact in DBPedia is
+represented as a triple of subject (S), predicate (P) and object (O)
+as defined in the standard RDF data model
+. As a whole DBPedia 2 has over
+20 million facts about 2 million entities. In addition to the facts
+extracted from Wikipedia articles, DBPedia also documents the
+hierarchical structure of entities by mining the {\it class}
+information from Wikipedia {\it Category} Pages. For example, the
+entity {\tt Macintosh} belong to a category {\tt Personal Computing}
+which in turn belongs to a category {\tt Office Equipment} which in
+turn belongs to the category {\tt Technology}. DBPedia has another
+important component documenting the {\it internal links} between
+various articles of Wikipedia which we employ in one of our algorithms.
+
+
+\subsubsection{Querying information from DBPedia}
+
+DBPedia provides a SPARQL (recursive acronym for SPARQL Protocol and
+RDF Query Language) query interface for querying and extracting the
+data desired by user. For our implementation we use Apache Jena
+Semantic Web tools which provide various packages to process data
+stored in RDF format. To improve the response time for queries we use
+the DBPedia TDB version which stores the data in Jena TDB format which
+is a high performance RDF store. The Disambiguation dataset of DBPedia
+consists of the data extracted from Disambiguation pages in Wikipedia
+which serve to disambiguate ambiguous titles of articles. The
+ambiguous terms of the input query are used to query the
+Disambiguation dataset to obtain a list of entities which form the set
+of all the possible entities intended by an ambiguous term.
+
+
+
+We now provide the results of a sample SPARQL query to demonstrate the
+query language and to preview how the DBPedia knowledge can be
+exploited for disambiguation. We want to know all the entities which
+are possibly referred to by the word {\it Pluto}. We use the following
+SPARQL query to extract all such entities:
+
+\begin{verbatim}
+ SELECT ?o WHERE { <http://dbpedia.org/resource/Pluto> ?p ?o}
+\end{verbatim}
+Now the DBPedia TDB store computes all the entities which disambiguate
+the word Pluto and returns them as a list as follows:
+\begin{verbatim}
+{o=http://dbpedia.org/resource/Pluto}
+{o=http://dbpedia.org/resource/Pluto_(Disney)}
+{o=http://dbpedia.org/resource/Plouto}
+{o=http://dbpedia.org/resource/Pluto_(mythology)}
+{o=http://dbpedia.org/resource/Homogenic}
+{o=http://dbpedia.org/resource/Planets_in_astrology}
+{o=http://dbpedia.org/resource/Pluto_(Astro_Boy)}
+{o=http://dbpedia.org/resource/Pluto_(Portuguese_band)}
+{o=http://dbpedia.org/resource/Pluto_(Marvel_Comics)}
+{o=http://dbpedia.org/resource/Pluto_(New_Zealand_band)}
+{o=http://dbpedia.org/resource/Pluto_(newspaper)}
+{o=http://dbpedia.org/resource/Pluto_(EP)}
+{o=http://dbpedia.org/resource/Pluto_(Canadian_band)}
+{o=http://dbpedia.org/resource/Pluto,_West_Virginia}
+\end{verbatim}
+
+\subsubsection{Outline of the baseline algorithm}
+
+Given an ambiguous query term and corresponding search result
+snippets, the algorithm tries to group and label similar search
+results. The important steps in the algorithm are as follows:
+
+\begin{itemize}
+  \item Process the search result snippets, perform stemming and
+    remove stop words and represent them as vectors in a suitable
+    vector space. We refer to them as {\it search result vectors}.
+  \item Send the ambiguous query term to DBPedia TDB to retrieve all the
+    entities which might be related to the query term.
+  \item For each of the retrieved entities in the previous step,
+    collect all the {\it facts} from DBPedia and form an {\it entity
+      information vector}.
+  \item Using the vector representation of search result snippets and
+    DBPedia entities, we now calculate similarities between entity info
+    vectors and search results so that we can assign each of the
+    snippet to an entity with maximum similarity to it.
+
+\end{itemize}
+
+\subsubsection{Processing the Search results}
+
+We are given a list of top 100 web search results from a popular
+search engine such as Yahoo. Retrieving the whole documents of search
+results and processing them for classification is not feasible because
+of the low response time expected of the modern search engines. Hence
+we only focus on processing the search result titles and snippets. 
+
+Each search result snippet is then processed through a stemming
+algorithm (We used Snowball Stemmer in our implementation) so that
+words with same roots are not misinterpreted as being different words
+due to suffixes. Stop words such as common prepositions, conjunctions
+are also removed from the text to avoid noise. We then use the
+traditional Information Retrieval model of Term Frequency / Inverted
+Document Frequency (TFIDF) to represent each of the snippet as a
+numerical vector of word frequency weights in the vector space of
+word frequencies.
+
+\subsubsection{TFIDF representation of result snippets}
+In information retrieval each document is thought of as a vector of
+terms, with each unique term representing a different dimension. A
+popular way of determining the component weights of a document vector
+along the various term dimensions is TFIDF representation. This
+weighting scheme assigns to a term $t$ a weight $w(t,d)$ given by 
+$$ w(t,d) = TF(t,d) * IDF(t) $$
+where $TF(t,d)$ denotes the frequency of the term $t$ in a document
+$d$ and $IDF(t)$ denotes the {\it Inverse Document Frequency} which is
+calculated as 
+$$ IDF(t) = \log \frac{N}{1 + DF(t)} $$
+where $N$ denotes the total number of documents in the corpus and
+$DF(t)$ denotes the number of documents in which the term $t$ occurs. 
+
+The $TF$ part of the weight is motivated by the fact that the
+relevance of a document to a particular query term is proportional to
+the number of times that term occurs in the document. The $IDF$ term
+on the other-hand is to negate the effect of high frequency of
+occurrence of certain `common' words. Terms which occur in fewer
+documents are more likely to have higher discriminating power than
+those which occur everywhere. Hence the $IDF$ term penalizes those
+terms which occur in a large number of documents in the corpus. The
+$IDF$ term in our experiment is calculated by considering the set of
+result snippets as the corpus and each snippet as a document.
+
+We now have a broad weighting scheme to represent each of the result
+snippet as a vector of words. This scheme can be further specialized
+by appropriately modifying the weights to model our intuitive notions
+of how important is the role played by term frequencies in determining
+the relevance. For example, the weighting of term frequency of a word
+in a given snippet is sometimes calculated as a function of raw term
+frequency to down-weight the effect of $TF$ in case of long documents.
+$$ TF = 1 + \log (TF(t,SR)))$$ where $TF(t,SR)$ is the term frequency
+of a term $t$ in a search result $SR$. Also the raw term frequency
+method unduly favors large number of occurrences of a single term of a
+query over the aggregate small number of occurrences of multiple terms
+of the query. The logarithmic function remedies such
+situations\cite{BSA93}.
+
+We implement multiple variants of snippet vectors according to the
+method of term weighting used in the TFIDF representation:
+
+\begin{table}[h]
+\centering
+\begin{tabular} {|l | c || l | c|}
+  \hline
+  \multicolumn{2}{|c||}{Term Frequency} & \multicolumn{2}{|c|}{Inverse
+    Document Frequency} \\
+  \hline
+  natural & $TF$ & no & 1 \\
+  logarithmic & $1 + \log (TF)$ & full & $\log \frac{N}{DF}$ \\
+  augmented & $0.5 + \frac{0.5 * TF}{\max TF}$ & & \\
+  \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Normalization}
+
+We now have each search result represented as a vector of term
+frequencies. As explained earlier we combine the terms of the title
+and snippet to form the search result vector. As a result there is a
+possibility that search result vectors have very different
+`lengths'. This is not desirable because when we calculate similarity
+between the search results and entities longer search results might
+dominate over the smaller ones. Hence we normalize each of the search
+result vectors by dividing them by their lengths.
+
+A straight forward method to calculate the lengths of a document is to
+get the $l^2$-norm considering it as an euclidean vector in a large
+dimensional space. This normalization is referred to as ``cosine
+normalization''. Thus the length of a search result vector
+$(t_1,t_2,...,t_n)$ is calculated as $\sqrt{t_1^2 + t_2^2 + ... +
+  t_n^2}$. However, this normalization is not quite ideal as explained
+further. 
+
+
+The new normalization we obtained by the above procedure is called
+{\it pivoted normalization}. It overcomes the bias of cosine norm for
+shorter length documents and closely matches the length distribution
+of relevant documents when used by a retrieval system.\cite{amit}
+Assuming that the $slope$ and $pivot$ are experimentally determined
+the pivoted normalization and the TFIDF document vector using it are
+algebraically expressed as follows:
+
+$$
+      pivNorm = (1 - slope)*pivot + slope*(oldNorm)
+$$
+
+
+\subsubsection{Formation of entity vectors}
+To get facts about each of the entities retrieved in the previous step
+we use the Abstracts dataset. Abstracts of Wikipedia articles provide
+a concise description of the entities with all the necessary keywords
+associated with the entity. Thus they constitute a perfect source for
+the facts about entities. We extract abstracts of the each of the
+entities in the list by querying the Dataset. We process the Abstracts
+in much the same way as search results to form TFIDF entity vectors
+corresponding to each of the entities.
+
+\subsubsection{Classification of search results}
+The representation of entity information vectors is similar to that of
+search result vectors -- they are composed of stemmed keywords
+extracted from facts about the entity. For the example given above, we
+include all keywords such as {\tt car, manufacturers, luxury, brand,
+  British, Coventry, west midlands}. The components of the vector are
+given by term frequencies. IDF, normalization are ignored for these
+vectors.
+
+The categorization of each search result ($SR$) is done as follows:
+\begin{itemize}
+   \item we first calculate the similarity of the $SR$ to each of the
+     entity vectors in the list we retrieved from DBPedia as the inner
+     product between the TFIDF representation of $SR$ and $ent$:
+     $$ sim(SR, ent) =  \langle SR, ent \rangle $$
+     $SR$ will be categorized to the $ent$ with maximum $sim$ value if
+     the $sim$ value is greater than a threshold value $T$.
+    \item The threshold value $T$ is set during the training phase so
+      by using the criterion that the selected value of $T$ should
+      lead to the maximum $F1$ (refer Evaluation chapter) value among
+      the training set. At the end of this step, all those $ent$s
+      with no $SR$s assigned to them are discarded.
+     \item For each of the uncategorized $SR$ (due to $sim$ being less
+       than threshold), we find the $ent$ which is most similar among
+       the remaining $ents$ and assign the $SR$ to it.
+\end{itemize}
+
+We discuss the results and evaluation of the performance of our
+implementation of the algorithm in the next chapter. 
+
+\subsection{Category Hierarchy based method}
+
+Every article in Wikipedia is tagged with a set of Categories to
+facilitate a topic-wise organization of articles. These categories are
+in turn arranged in a hierarchy with ``Main Topic Classifications'' as
+the ultimate parent. This hierarchy is however not a simple tree. It
+forms a dense directed graph with each article belonging to thousands
+of Categories if we consider the closure of the parent
+relationship. For example the article \verb|Guy_Kawasaki| belongs to
+the categories such as:
+\begin{verbatim}
+        Apple Inc. employees
+        Apple evangelists
+        Edu-Ware
+        Living people
+        ʻIolani School alumni
+        American businesspeople
+        American Christians
+        People from Honolulu, Hawaii
+        Stanford University alumni
+        University of California, Los Angeles alumni
+\end{verbatim}
+
+
+These categories further themselves are children of Super-categories
+such as:
+\begin{verbatim}
+        Silicon Valley Entrepreneurs,
+        Technology,
+        American People of Japanese Descent
+\end{verbatim}
+
+
+From this example it is easy to see why Category information might be
+helpful. Let's say a snippet for the query `Kawasaki' talks about some
+entrepreneurship meet-up in Silicon Valley which Kawasaki happened to
+attend. Without the background knowledge that there exists a Kawasaki
+who is a prominent Silicon Valley entrepreneur it is difficult to
+associate that snippet with the entity \verb|Guy_Kawasaki|. Hence we
+suspect that adding Category information as an additional feature to
+the snippet vectors might boost the clustering performance.
+
+\subsubsection{Outline of the algorithm}
+The key steps of the algorithm are as follows:
+\begin{itemize}
+  \item Process each snippet and identify the potential Wikipedia
+    entities in it.
+  \item Map each potential entity to an exact Wikipedia entity and for
+    each entity obtain its parent Category.
+  \item For each parent Category obtained in the previous step fetch
+    all of its ancestors up to 2 or 3 levels above it.
+  \item To the raw snippet text add the parent Category labels of all its
+    entities, and the ancestor Category labels of the parents obtained
+    in the previous steps to form the feature enhanced snippet.
+  \item Represent the enhanced snippet in vector form and cluster them
+    using classical cluster algorithms.
+\end{itemize}
+
+\subsubsection{Identification of entities}
+
+Language processing tools can be used on the snippets to identify
+potential Wikipedia entities. We used Tagme API\cite{tagme} which
+identifies potential entities with some accuracy measure. For example,
+consider the following snippet:
+\begin{verbatim}
+Kawasaki disease is most common among children of Japanese and Korean
+ descent, but can affect all ethnic groups. The first symptom is a
+ high fever
+\end{verbatim}
+
+We obtain the following Wikipedia titles associated with significant
+accuracy:
+\begin{verbatim}
+         Kawasaki_disease,
+         Child,
+         Japanese_people,
+         Koreans,
+         Ethnic_group,
+         Symptom,
+         Fever
+\end{verbatim}
+ We map these titles to unique entities in
+DBPedia Titles dataset. Thus we obtain an entity list corresponding to
+each snippet.
+
+
+\subsubsection{Extraction of Category data}
+For each entity in a snippet we obtain its parent Category by using
+DBPedia Article Categories dataset. For each parent Category obtained,
+we retrieve ancestor Categories up to 3 generations using the DBPedia
+Category Hierarchy dataset. For this, we use a SPARQL path queries
+which extract all the nodes in the DBPedia graph within a path length
+of 3. An example SPARQL path query is as follows: 
+
+\begin{verbatim}
+SELECT distinct ?o WHERE {<childCategory> skos:broader{,3}  ?o}
+\end{verbatim}
+
+\subsubsection{Snippet vector formation and clustering}
+
+For every snippet we retrieve its entity list. For each entity in the
+list we retrieve its Category data and associate it to the snippet of
+that entity. Thus corresponding to each snippet we have two feature
+components -- the raw text of the snippet and the Category data of the
+entities in the snippet. We can associate a parameter $\alpha$ with
+the Category data part to control and tune its relative importance in
+the clustering. We finally represent the combined features in
+numerical vector form using word frequencies. The set of snippet
+vectors thus obtained is fed to a classical clustering algorithm like
+{\it Bisecting K-Means} to obtain the final clustering of the dataset. We
+discuss the evaluation of the algorithm in the next chapter.
+
+
+\subsection{Link Structure based method}
+Until now, all the algorithms discussed in the literature for
+clustering documents and snippets consider text as the primary data
+feature.  {\it Bag of Words} representation and {\it Cosine
+  similarity} measure have been the mainstay of clustering systems and
+a variety of text processing tasks. Text snippets often have a lot of
+noise words which do not contribute any useful features for clustering
+and contribute to the degradation in the overall performance. The
+topical search clustering method proposed in \cite{Ferragina} marks a
+radical departure from these conventional systems in that it uses a
+{\it Bag of Entities} representation for the snippets instead of the
+{\it Bag of words} and applies the relatively novel {\it Spectral
+  clustering} techniques instead of {\it Cosine similarity}
+measures. The algorithm represents the snippets and entities in the
+snippets as nodes of a graph with edge weights calculated using the
+network properties mined from Wikipedia. The graph is then clustered
+using spectral techniques to obtain a clustering.
+
+\subsubsection{Outline of the algorithm}
+The key steps of the algorithm are as follows:
+\begin{itemize}
+  \item Process each snippet to identify potential Wikipedia titles
+    and map each title to a DBPedia entity.
+  \item Construct an undirected graph with snippets and entities as
+    the nodes.
+  \item Calculate the edge weights between two entity nodes by mining
+    internal link measures from Wikipedia.
+  \item Use the accuracy measure obtained from entity spotter as the
+    edge weight between a snippet node and an entity node.
+  \item Obtain the Eigenvalue decomposition of the graph and based on
+    the properties of the `spectrum' cluster the nodes of graph into
+    components.
+\end{itemize}
+
+\subsubsection{Retrieval of entities}
+We use the same procedure as discussed in the previous method to
+retrieve all entities in the snippets using Tagme API. For this
+method, we also need to store the accuracy measure of the Entity
+identification for further use in the algorithm.
+
+\subsubsection{Construction of the Entity Graph}
+As discussed earlier to obtain a clustering of the snippets we
+represent them as nodes of a graph and try to cluster the nodes. The
+edge weights between the nodes of the graph denote the strength of the
+similarity between the nodes. However, we want to avoid using {\it
+  Cosine similarity} as it has been extensively using in classical
+methods. We want to capture the sense of a `topic' as a set of related
+entities.  For example the topic \verb|Guy_Kawasaki| is represented by
+the following set of entities:
+\begin{verbatim}
+Apple, Entrepreneurship, Silicon_Valley, Angel_Investor,
+Business_Advisor etc.
+\end{verbatim}
+Similarly the topic \verb|Kawasaki_Motors| is obtained as a set of the
+following entities:
+\begin{verbatim}
+Motor_cycles, All_Terrain_Vehicles, Fuel_Filter, Manufacturing etc.
+\end{verbatim}
+
+Hence we construct an undirected graph with two kinds of nodes:
+\begin{itemize}
+  \item Snippets
+  \item Wikipedia entities identified in the snippets
+\end{itemize}
+so that in the final clustering, we obtain all the entities and
+snippets belonging to a particular topic in the same cluster.
+
+\subsubsection{Edge weight calculation}
+
+Now, to capture the strength of similarity between such nodes we
+define the edge weights. We need to consider three kinds
+of edges:
+\begin{itemize}
+  \item Snippet to Snippet edges
+  \item Snippet to Entity edges
+  \item Entity to Entity edges
+\end{itemize}
+
+{\it Snippet to Snippet edges} are assigned zero weights as we want to
+pretend that we don't know how the snippets are related to each
+other. 
+
+To get {\it Snippet to Entity edge} weights we simply assign the value
+of accuracy determined by the Tagme API when spotting an entity in a
+particular snippet. For all the entities not in the snippet, the
+snippet-entity edge weights are taken to be zero.
+
+To calculate {\it Entity to Entity edge} weights, \cite{Ferragina}
+suggests to exploit the internal page link information mined from
+Wikipedia. The feature used to determine similarity between two
+Wikipedia pages is to consider the size of intersection of the sets of
+in-links from other Wikipedia pages. If two Wikipedia entities are
+linked simultaneously from a lot of other pages, it is a strong
+indicator of the their relatedness.
+
+The exact formula used to measure the similarity between two entities
+is inspired from `Normalized Google Distance' (NGD). NGD is used to
+measure the distance between given keywords $x$ and $y$. Let $H_x$ and
+$H_y$ represent the set of hits ({\it ie} pages which contain the
+keyword) of $x$ and $y$ respectively.
+
+Then NGD is defined as follows:
+$$
+ NGD(x, y) = \frac{\max(\log |H_x|,\log |H_y|) - \log |H_x \cap H_y|}{
+   \log M - \min(\log |H_x|, \log |H_y|)}
+$$
+where $M$ denotes the total number of webpages returned by Google.
+
+Analogously, to capture the similarity between two Wikipedia entities
+$a$ and $b$ we consider their sets of in-links $T_a$ and $T_b$
+respectively. Since we need the similarity between entities rather
+than the distance, we take the inverse of $NGD$ formula. The edge
+weight $edg(a,b)$ between the nodes represented by $a$ and $b$ is
+given by:
+$$ 
+M_{a,b} = \frac{\log W - \min(\log |T_a|, \log |T_b|)}{\max(\log
+  |T_a|,\log |T_b|) - \log |T_a \cap T_b|}
+$$
+where $W$ denotes the total number of Wikipedia pages. If $T_a \cap
+T_b$ turns out to be empty we assign zero weight to that edge.
+
+We use DBPedia internal links dataset to determine in-links of
+entities and calculate the edge weights between nodes representing
+them using above formula.
+
+We now represent the whole graph of snippets and entities using an
+adjacency matrix $M$. The entry $M_{i,j}$ of the matrix denotes the
+edge weight between node $i$ and node $j$. The goal of our algorithm
+is to find clusters in this graph which effectively gives the
+clustering of the snippets which constitute a subset of the nodes of
+the graph.
+ 
+\subsubsection{Spectral clustering of the adjacency matrix}
+We first define the concepts and discuss the theory behind spectral
+clustering and then apply it to our problem of snippet clustering.
+
+\subsubsection{Definitions}
+We need the following definitions for spectral clustering:
+
+{\it Degree Matrix} -- The Degree Matrix $D$ is defined as a diagonal
+matrix with the degree of vertex -- the sum of weights of all edges
+out of a vertex -- at the corresponding diagonal entry:
+$$
+D_{i,i} = \sum_j M_{i,j}
+$$
+
+{\it Unnormalized Laplacian} -- The Unnormalized Laplacian Matrix $L$
+of a graph is defined as the difference of Degree Matrix $D$ and the
+adjacency matrix of the graph $M$.
+$$
+L = D - M
+$$
+
+{\it Normalized Laplacian} -- The Normalized Laplacian of the graph is
+obtained by premultiplying the Laplacian $L$ with $D^{-1}$.
+$$
+L_{rw} = D^{-1} L
+$$
+
+{\it Volume of a set of nodes} -- Given a graph $G(V,E)$ the volume of
+a set of nodes $A \subset V$ is defined as the sum of degrees of all
+the nodes in $A$
+
+$$
+vol A = \sum_{i \in A} D_{i,i}
+$$
+
+\subsubsection{Theory}
+The aim of spectral clustering is to partition a graph $G$ into $m$
+components $A_1,A_2,..,A_m$ such that the vertices in $A_i$ are
+densely connected via strong edge-weights whereas the edges crossing
+the boundaries of these components are sparse and low weight. We first
+solve the easier problem of splitting the graph into two components
+$A$ and $\bar{A}$ whose solution can be recursively applied to $A$ and
+$\bar{A}$ to obtain the final clustering.
+
+The formal objective function expressing this criterion for
+partitioning the vertex set $V$ into two sets $A$ and $\bar{A}$ is
+defined by \cite{shimalik} as follows:
+$$
+Ncut(A,\bar{A}) = \left(\frac{1}{vol A} + \frac{1}{vol \bar{A}}\right) \sum_{i \in A, j
+  \in \bar{A}} M_{i,j}
+$$
+
+Finding the exact optimal solution of the above objective function has
+been proved to be NP hard. Hence the paper \cite{shimalik} proposes to
+use an approximate algorithm which we discuss further. The continuous
+relaxation of the above problem can be efficiently solved and serves
+as an approximate optimal solution of the problem.
+
+In the continuous relaxation the partition set $A$ is represented by
+the indicator vector ${\bf y}$ where ${\bf y}_i = 1$ indicates that
+node $i \in A$ and ${\bf y}_i = 1$ indicates that node $i \in A$ and
+${\bf y}_i = -1$ indicates that node $i \notin A$. The continuous
+variable formulation turns out to be equivalent to finding the
+eigenvector corresponding to the second least eigenvalue of the
+following generalized eigenvalue problem \cite{shimalik} ($M$ denotes
+the adjacency matrix):
+$$
+(D-M){\bf y} = \lambda D{\bf y}
+$$
+ which is nothing but the second least eigenvector ${\bf y}^*$ -- also known as
+     {\it Fiedler vector} of the Normalized Laplacian matrix $L_{rw}$
+     we defined earlier.
+
+To summarize, the algorithm for finding the optimal partitioning of
+the nodes of a graph into $A$ and $\bar{A}$ is as follows:
+
+\begin{itemize}
+  \item Form the Normalized Laplacian matrix $L_{rw}$ of the adjacency
+    matrix $M$ by $L_{rw} = D^{-1}(D-M)$.
+  \item Get the eigenvalue decomposition of the matrix $L_{rw}$.
+  \item Find the eignevector ${\bf y}^*$ corresponding to the second least
+    eigenvalue $\lambda_2$.
+  \item For all $i$ such that ${\bf y}_i^* > 0$ assign node $i$ to $A$ and for all
+    $i$ such that ${\bf y}_i^* < 0$ assign node $i$ to $\bar{A}$.
+\end{itemize}
+
+We then apply this algorithm recursively to the components $A$ and
+$\bar{A}$ to obtain final clustering of the nodes of the graph.
+
+\subsubsection{Clustering of the snippets}
+
+We now apply the discussed algorithm to our graph of snippets and
+entities which automatically induces a clustering on snippets. We
+implemented an iterative algorithm which selects an adjacency matrix
+from a list of the adjacency matrices corresponding to the subgraphs
+of the clusters at each iteration. Initially the list consists of a
+single matrix $M$ representing the graph of snippets and entities. The
+algorithm is stopped once the desired number of clusters is reached.
+
+The key issues of applying the partitioning algorithm are how to choose
+the subgraph that is to be partitioned in the next step and when to
+stop. In each iteration a Matrix with the least value for second
+eigenvalue ($\lambda_2$) is chosen to be partitioned. It is known from
+spectral graph theory that value of $\lambda_2$ -- also known as
+`algebraic connectivity' -- indicates the sparseness of the
+graph. Thus, in each iteration the most sparse subgraph is chosen to
+be split. This is intuitive because we expect a subgraph representing
+entities and snippet of multiple topics to have less connectivity than
+a subgraph representing a single topic. The algorithm can be
+summarized as follows:
+\begin{algorithm}
+\caption{Spectral clustering of the snippet-entity graph}
+\begin{algorithmic}
+\Function{getSpectralClusters}{$M$, $nClust$}
+   \State $clusterList \gets \phi$
+   \State \Call {addToList}{$clusterList, M$}
+   \State $n \gets 1$ 
+   \While {$n < nClusts$}
+       \State $current \gets $ \Call {pickLeastLambda2}{$clusterList$}
+       \State $eigs \gets $ \Call {getEigenVectors}{$current$}
+       \State ${\bf y}^* \gets eigs[2]$ \Comment{gets Fiedler vector}
+       \State $(A,B) \gets $ \Call {splitMatrix}{$current, {\bf y}^*$}
+       \Comment{partition it using Fiedler vector}
+       \State \Call {removeFromList}{$clusterList, M$}
+       \State \Call {addToList}{$clusterList$, $A$}
+       \State \Call {addToList}{$clusterList$, $B$}
+       \State $n \gets n + 1$
+   \EndWhile
+   \State \Return $clusterList$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+As a final step, we filter out snippets from each cluster and present
+them as the final clustering obtained by the algorithm. We
+experimented with using other criteria based on the number of snippets
+for the selection of the matrix to be partitioned as well as the
+stopping criterion. 
+
+The criterion for the selection of subgraph to be partitioned also has
+to take into account the number of snippets because it doesn't make
+sense to partition a cluster with zero snippets. Hence we include a
+threshold number of snippets as an additional criterion for selection
+of a subgraph. We report the results in next chapter.
+\section{Corpus based method}
+As a counterpart to the Ontology based methods which require a
+manually organized knowledge source, we now discuss a corpus based
+method to disambiguate query terms which does not depend upon an
+externally defined list of `senses' for the term. Instead this method
+uses a huge list of 5grams as a corpus which can be exploited to
+deduce the relationship between the sense of a term given its context
+as explained earlier.
+
+\subsection{The algorithm}
+We follow the algorithm used in \cite{navigli} which uses the Google
+Web1T corpus as the source of 5grams. We however tried to adopt the
+freely available Google Books Ngram dataset. It consists of all those
+5grams (which appear with a frequency greater than 40) along with
+their frequencies in the Google Books.
+\begin{itemize}
+  \item Given an ambiguous query $q$, a {\it co-occurrence graph}
+    $G_q(V,E)$ is built such that $V$ is the set of terms related to
+    the query terms $q$ and $E$ is the set of weighted edges, each
+    denoting the strength of co-occurrence between the terms.
+  \item The set of co-occurring terms $V$ is determined from the
+    5gram corpus as follows:
+    \begin{itemize}
+      \item Initially $V_0$ contains all the non-stop words of the
+        search result snippets. We then add all those words $w$ to
+        $V_0$ which have a `strong' co-occurrence relation ship with
+        query $q$ which is determined by the Dice co-efficient defined
+        as follows:
+        \begin{equation*}
+          Dice(q,w) = \frac{2c(w,q)}{c(w) + c(q)}
+        \end{equation*}
+        $w$ is added only if $Dice(q,w) \ge 0.0033$
+      \item The previous step is repeated for each of the $w \in
+        V_0$. That is we now add all those $w^\prime$ which have Dice
+        greater than the threshold for each of $w$ to get the final
+        $V$.
+      \item All disconnected vertices are then removed.
+    \end{itemize}
+     \item The primary hypothesis of the algorithm is that all the
+        terms belonging to the same sense are more likely to form
+        cycles of length 4 in the co-occurrence graph.
+     \item Thus for each edge we measure its importance to any of the
+        senses by looking at the `squares' it participates in. It is
+        numerically estimated as:
+      \begin{equation*}
+          Sqr(e) = \frac{\mbox{no. of squares $e$
+              participates in}}{\mbox{no. of squares $e$ could
+              participate in}}
+       \end{equation*}
+     \item Finally all those edges are removed whose $Sqr(e)$ value
+        is less than a threshold (0.45) to get a set of connected
+        components which correspond to various senses the ambiguous
+        term intends.
+     \item We assign each of the search result snippets to one of the
+       connected components using the number of common words as the
+       criterion. 
+\end{itemize}
+
+\subsection{Implementation and results}
+We implemented the algorithm as described above and verified that it
+works on small example co-occurrence graphs. We found out that the
+resultant connected components of terms we obtained were not useful
+for our present task of classifying search results. 
+
+When we ran the system with the input query `Beagle' we obtained a set
+of connected components some of which are shown below:
+\begin{verbatim}
+[chairman, radiologi, ophthalmologi, materia, zoologi, anatomi, pssri,
+  rhetor, pilling, grate, dean, neurologi, pathologi, surgeri,
+  physiologi, yale, regiu, geologi, botani, emeritu, sociologi,
+  professor, pediatr, obstetr, adjunct]
+
+[maxwel, seren, odor, melodi, singer, bye, savour, savor, sweet, bet,
+ concord, perfum, potato, odour, Beagl]
+
+[erlbaum, anthropolog, psychoanalyt, collegi, lawrenc, dental, apa,
+ associ, southeast, dietet, nj, officiali, geologist]
+
+[rightli, judg, bench, dissent, condemn]
+
+[lookout, forecastl, shackleford, masthead, seashor]
+
+\end{verbatim}
+
+ We can see that while the clusters consist of various related groups
+ of words, they are not necessarily relevant to the word ``beagle". For
+ example, we have in one cluster, the words ``radiology, zoology,
+ anatomy, ophthalmology" etc. but they are not in anyway relevant to
+ our query.
+
+The problem arises mainly because of the first step of the algorithm,
+in which, we add all the words of result snippets to the initial
+vertex set of the co-occurrence graph. The program then goes on to
+retrieve all those words which co-occur with a high frequency with
+these snippet words. If the snippet consisted of a word `zoology'
+(perhaps in describing the Darwin's trip on HMS Beagle during which he
+observed various species on South American coast), the algorithm
+proceeds to add all those words which have co-occurred with it in the
+Data Set, thus forming a very strong `loopy' connected component of
+terms related to zoology like, botany, anatomy, ophthalmology
+etc. Thus we get this cluster in the output which is not in anyway
+relevant to the query.
+
+We also note one further limitation of my implementation which is that
+the Data used in forming the co-occurrence graph is from two very
+different sources.
+\begin{itemize}
+\item The initial vertex set consisted of words extracted from result snippets
+which are from the Web.
+\item The co-occurring words added to the graph are extracted from the Ngram
+dataset we prepared from the Google Books data. 
+\end{itemize}
+Most of the emphasis on the web results was on the sense ``a breed of dog"
+whereas most of the high co-occurrences of the word `beagle' in the Google
+Books Dataset were in the sense `HMS Beagle' that Darwin sailed on.
+
+\section{Self-contained methods}
+
+We now discuss the traditional methods which did not require any
+external knowledge in the form of either corpora or ontologies. They
+depend upon the syntactic features of snippets for estimating
+similarity. We first discuss the baseline methods which apply the
+traditional clustering algorithms.
+
+\subsection{Baseline clustering algorithms}
+
+Clustering has been studied extensively in the context of long
+documents. The paper \cite{clusteringCompare} studied the performances
+of traditional clustering algorithms like {\it K-Means clustering},
+{\it Agglomerative Hierarchical clustering (AGHC)} and {\it Bisecting K-Means
+  clustering} and concluded that the {\it Bisecting K-Means} had the
+same clustering quality as {\it AGH clusterting} and much more
+efficient. Hence we briefly describe the {\it Bisecting K-Means}
+algorithm and use it as a baseline in our comparison of clustering
+algorithms. All these algorithms are applied after converting the
+documents into their TFIDF numerical vectors.
+
+\subsubsection{Bisecting K-Means algorithm}
+We first describe the basic K-Means algorithm before detailing the
+Bisecting K-Means. K-Means clustering involves following steps:
+\begin{enumerate}
+  \item Choose $k$ points randomly from the data points as the initial
+    cluster centroids.
+  \item Assign each point in the dataset to the closest among the $k$
+    centroids. Cosine similarity is typically used for documents and
+    snippets. 
+  \item Recompute the cluster centroids as the mean of the
+    co-ordinates of all points belonging to their clusters.
+  \item Repeat step 2 and step 3 until convergence.
+\end{enumerate}
+
+The Bisecting K-Means clustering algorithm instead of choosing the $k$
+centroids at the outset tries to divide a particular cluster into two
+at every step. The algorithm is as follows:
+
+\begin{enumerate}
+  \item Pick a cluster to split from among the current set of clusters
+    based on some criterion -- usually size.
+  \item Apply K-Means algorithms with $k = 2$ on the chosen cluster to
+    divide it into two subclusters.
+  \item Repeat step 2 for threshold times and choose the split with
+    greatest cluster similarity. (refer chapter 4 for cluster
+    quality measures)
+  \item Repeat steps 1, 2, 3 until we have desired $k$ clusters.
+\end{enumerate}
+
+The number of clusters $k$ which is required as a parameter to these
+algorithms can itself be chosen by running the algorithm multiple
+times with varying values for $k$ and choosing the one clustering
+which yields maximum intra-cluster similarity.
+
+We compare the performance of other clustering algorithms using this
+as baseline in chapter 4.
+
+\subsection{Lingo algorithm}
+The biggest improvement over traditional clustering algorithms was
+obtained by \cite{Zamir} by using Suffix trees to identify frequent
+phrases across snippets. The Lingo algorithm used by the Carrot2
+clustering service \cite{Weiss} combines the Suffix tree algorithm
+with SVD to obtain good quality clusters. Among the systems which do
+not use any external knowledge Lingo turns out to be the highest
+performing system. We now decsribe the Lingo algorithm. Unlike other
+clustering algorithms, Lingo first finds suitable cluster labels
+representing the various topics and then assign each snippet to a
+particular label.
+
+Following are the major steps of the algorithm:
+\begin{enumerate}
+  \item Identify the most frequent terms and phrases from among the
+    snippets. 
+  \item Represent the snippet set as a term document matrix and obtain
+    its Singluar Value Decomposition (SVD) to identify the important
+    topics. 
+  \item Correlate topic vectors obtained in the step 2 with frequent
+    phrases obtained in step 1 to determine cluster label candidates.
+  \item Assign each snippet to the label with which it has maximum
+    cosine similarity
+\end{enumerate}
+
+\subsubsection{Most frequent phrases}
+
+The paper \cite{Zamir} uses Suffix tree to identify most frequent
+phrases among a collection of sentences. Each edge in the suffix tree
+is labeled with a non-empty substring. The label of a node is then
+simply the concatenation of edge-labels encountered on the path from
+root to the node. Each node also maintains the number of times its
+phrase is encountered. As the snippets are being read, the suffix tree is
+updated by introducing new phrases into the tree by adding edges if
+the words are new or by increasing the count at the nodes if the edges
+representing the words of phrase are already present. 
+
+The suffix tree is completely once we read in all the snippets. The
+most frequent terms and phrases are extracted by setting a threshold
+count. These terms and phrases are together organized into a matrix
+$T$ of size $t \times (t+p)$ analogous to a term-document matrix.
+
+\subsubsection{Identifying topics in snippets}
+
+The set of all snippets is represented as a term-document matrix $A$
+using {\it TF-IDF} representation, after processing them to stem the words
+and remove stop words. Thus we have a matrix of dimension $t \times d$
+where $d$ is the number of snippets and $t$ the number of terms. We
+then apply Singular Value Decomposition to the matrix $A$ to obtain $A
+= U \Sigma V^T$. $U$ is a $t \times t$ orthogonal matrix and $\Sigma$
+is a $t \times d$ diagonal matrix and $V$ is a $d \times d$ orthogonal
+matrix. It is known from theory that the column vectors of the matrix
+$U$ represent the `abstract topics' of which the documents in the
+matrix $A$ are composed. To obtain a clustering with $k$ topics, we
+choose the first $k$ columns of the matrix $U$. The choice of $k$ can
+be automated by choosing $k$ such that the $k$-rank approximation
+$A_k$ of the matrix $A$ is close enough:
+$$
+\frac{\|A_k\|_F}{\|A\|_F} \ge q
+$$
+
+We thus have a concise representation of the various topics discussed
+in the snippets in the form of the column vectors of the matrix $U_k$.
+
+\subsubsection{Induction of cluster labels}
+The columns of $U_k$ might themselves have negative entries thus
+making them unfit for acting as the `topic labels'. To obtain topic
+labels, we pre-multiply the frequent phrase matrix $P$ with $U_k^T$ so
+that each row of the product $M = U_k^T P$ represents similarity of
+topics $U_i^T$ to the phrases $P_j$. For each topic row $U_i^T$ we
+select the label phrase $P_j$ which has the maximum cosine
+similarity. Thus we are left with $k$ phrases which serve as topic
+vectors. A topic matrix $T$ is then formed constituting the $k$ topic
+vectors. 
+
+\subsubsection{Assigning snippets to topics}
+The final step of assigning the snippets is now straight forward with
+each snippet vector being assigned to the topic vector with with it
+has highest cosine similarity. This can be formally expressed as
+follows:
+$$
+C = T^T A
+$$
+The element $C_{ij}$ of above matrix represents the dot product of
+topic $i$ with snippet $j$. Thus the snippet $j$ is assigned to topic
+$i$ for which $C_{ij}$ is maximum, provided the maximum exceeds
+certain threshold. All those snippets whose dot products fall below
+the threshold are assigned to a special cluster {\it Others}.
+
+Thus we successfully obtained the clustering of the snippets according
+to their latent topics extracted from the snippets. The results are
+discussed in the next chapter.
+
+\subsection{Document summarization method}
+
+We realized that the methods of Document Summarization can also be
+applied to the clustering of search results problem. The whole set of
+snippets can be thought of as a document discussing various
+topics. The document summarizer thus extracts the most salient
+sentences representing various topics in this snippet-document. This
+implementation has been discussed by \cite{satya} and we use the
+results of that system in our comparison of clustering approaches.
+
+\section{Hybrid approaches}
+
+After having implemented the various algorithms we described above, we
+tried to combine useful ideas from different systems so as to further
+improve the clustering performance. We document these experiments in
+the subsequent subsections.
+
+\subsection{Category Hierarchy + Lingo}
+
+Lingo is a self-contained algorithm which doesn't depend upon external
+knowledge to discover hidden topics in the snippets. On the other hand
+the {\it Category Hierarchy} system we implemented seeks to supplement
+the syntactic features of the snippets by extracting the semantic
+categories to which the words in the snippets belong. It is thus
+natural to expect that a combination of both these systems might
+result in an increase in clustering performance.
+
+\subsubsection{Enriching the snippets}
+
+Instead of feeding the bare snippets to the Lingo system, we
+concatenated the snippets with the Category information mined from
+DBPedia for all the entities discovered in the snippets. The addition
+of these semantic categories might make it easier for SVD to discover
+the latent topics in the snippets.
+
+We fed the enriched snippets to the Lingo clusterer to obtain the
+final clustering. We found that the performance of clustering
+improved marginally. We report the exact figures in the next chapter.
+
+
+\subsection{Wiki Abstracts + Bisecting K-Means}
+
+We used Wikipedia abstracts in the baseline Knowledge based
+classification method. In it we mapped each snippet to the Wikipedia
+entity with whose abstract it has maximum similarity. While this direct
+mapping of snippets onto entities has the advantage that it is fast,
+it is certainly worth an attempt to incorporate a good clustering
+algorithm on top of it. 
+
+Thus we implemented a system which enriches the snippets by
+concatenating them with the abstracts of the Wikipedia entities which
+are spotted in the snippets. The enriched snippets now have an extensive
+background information of the entities about which they are talking,
+thus making them more informative. As expected we noticed a
+significant improvement in the clustering quality, which we report in
+the next chapter.
+
+
+
+ 
+
+
+\chapter{Evaluation of the systems and results}
+We now discuss the evaluation methodology and the results of the
+systems we described in the previous sections on the SemEval-2013
+test dataset. 
+
+\section{Evaluation methodology for clustering quality}
+Clustering quality can be evaluated by using {\it internal} criteria
+and {\it external} criteria. The internal criteria try to reward
+systems which produce high intra-cluster similarity and low
+inter-cluster similarity. These measures don't depend on ground-truth
+or gold standard clustering to determine cluster quality. Hence they
+are not so uselful for a real world task such as search result
+clustering.
+
+Thus effective evaluation of clustering quality requires a manually
+prepared ground truth clusters of the dataset. The evaluation measures
+which utilize such manually prepared data to define clustering quality
+are called external criteria. The SemEval-2013 organizers have provided
+such manually labeled gold standard clusters to test the clustering
+quality of the participating systems. We now discuss the various kinds
+of measures that can be used to evaluate clustering quality.
+
+\subsection{Rand Index}
+
+The {\it Rand Index} ($RI$) of a clustering $\mathcal{C}$ with respect
+to a gold standard $\mathcal{G}$ is defined as the fraction of true
+positives and true negatives in the clustering. If two snippets $s_1,
+s_2$ belong to the same cluster in $\mathcal{G}$ as well as
+$\mathcal{C}$ the snippet pair is considered to be `true
+positive'($TP$) and vice-versa. False positive and false negative are
+defined in similar manner. Thus Rand Index is given by:
+
+$$
+RI(\mathcal{C},\mathcal{G}) = \frac{TP + TN}{TP + TN + FP + FN}
+$$
+
+\subsection{Jaccard Index}
+
+{\it Jaccard Index} is a minor modification of Rand Index which
+considers only true positives as a fraction of the total snippet
+pairs. It serves to undermine the effect of superfluous points attained
+due to accidental false positives. Thus it is given by:
+$$
+JI(\mathcal{C},\mathcal{G}) = \frac{TP}{TP + TN + FP + FN}
+$$
+
+\subsection{F1 measure}
+
+{\it F1 measure} is defined as the harmonic mean of {\it Precision}
+and {\it Recall} and serves to capture both of these measures in a
+single numerical value. 
+
+Precision $(P)$ of a clustering measures the accuracy of snippet
+grouping given by a clustering $\mathcal{C}$. It is calculated for
+each cluster in the output clustering. Let $C_j \in \mathcal{C}$
+be a cluster. Then it's precision is defined as
+$$
+P(C_j) = \frac{|C_j^s|}{|C_j|}
+$$ 
+where $C_j^s$ denotes the intersection between $C_j$ and the gold
+cluster $G_s \in \mathcal{G}$ which maximizes the intersection.
+
+Recall $(R(G_s))$ is calculated for each Gold standard cluster $G_s$ and
+defined as follows: 
+$$
+R(G_s) = \frac{|\bigcup_{C_j \in \mathcal{C}_s}C_j^s|}{|G_s|}
+$$ where ${\mathcal{C}_s}$ is the set of clusters whose majority
+snippets are from ${\mathcal{G}_s}$.
+
+The final value of Precision $P(\mathcal{C})$ of a clustering is the
+weighted mean of precisions of individual clusters:
+
+$$
+P(\mathcal{C}) = \frac{\sum_{C_j \in \mathcal{C}}P(C_j)|C_j|}{\sum_{C_j \in \mathcal{C}}|C_j|}
+$$
+
+Similarly the final value of Recall $R(\mathcal{C})$ is given by:
+
+$$
+R(\mathcal{C}) = \frac{\sum_{G_s \in \mathcal{G}}R(G_s)|G_s|}{\sum_{G_s \in \mathcal{G}}|G_s|}
+$$
+
+Finally $F1$ measure is defined as:
+
+$$
+F1(\mathcal{C}) = \frac{2PR}{P+R}
+$$
+
+\section{Evaluation methodology for clustering diversity}
+
+An evaluation measure particularly relevant to search result
+clustering is the degree of diversity of topics presented to the user
+of search engine in first $K$ results. To measure this we need a list
+form representation of the clustering. Given a clustering $\mathcal{C}
+= (C_1,C_2,...,C_m)$, we add to initially empty list the first element
+of each cluster $C_j$; then iteratively we add the second element of
+each cluster $C_j$ and so on. Two measures of diversity are then
+defined over this list which we describe below:
+
+\subsection{Subtopic recall at rank K}
+This measure conveys how many of the topics in gold standard are
+represented in the result list $(r_1,r_2,...,r_n)$ obtained by a given
+clustering.
+$$
+S-recall@K = \frac{|\{topic(r_i): i \in \{1,...,K\}\}|}{g}
+$$
+where $topic(r_i)$ denotes the topic assigned by gold standard to
+result snippet $r_i$ and $g$ denotes the number of topics in gold
+standard.
+
+\subsection{Subtopic precision at recall r}
+It is defined as the number of unique topics until top $K_r$ results
+where $K_r$ is the minimum number of results at which recall $r$ is
+obtained.
+$$
+S-precision@r = \frac{|\{topic(r_i): i \in \{1,2,...,K_r\}|}{K_r}
+$$
+
+\section{Results of Evaluation}
+
+We now summarize the results of evaluating various implementations
+discussed above against the gold standard clustering provided by
+SemEval-2013.
+\subsection{Clustering quality results}
+
+\begin{table}[h]
+\centering
+\begin{tabular} {|c | c | c | c|}
+  \hline
+  Algorithm & Rand Index & Jaccard Index  & F1 \\
+  \hline
+  Baseline DBpedia & 60.79 & {\bf 31.30} & 40.75 \\
+  Category Hierarchy & 59.21 & 25.24 & 64.70 \\
+  Spectral Clustering & 54.30 & 21.42 & 54.16 \\
+  \hline
+  Bisecting K-Means & 60.4 & 20.32 & 52.8 \\
+  Lingo & 55.7 & 23.3 & 63.65 \\
+  Doc Summarizn & 59.55 & 15.05 & 67.09 \\
+  \hline
+  Lingo + Category & 58.8 & 28.6 & {\bf 67.23} \\
+  BiK-Means + Abstracts & {\bf 61.2} & 19.7 & 65.6 \\
+  \hline
+\end{tabular}
+\caption{Clustering quality evaluation of various systems}
+\end{table}
+
+The clustering quality results indicate that the best performing
+system in terms of $F1$ measure is the Hybrid Lingo + Category
+hierarchy system. In terms of Jaccard Index however, baseline DBPedia
+beats them all. We analyze the results in the next chapter.
+
+\subsection{Clustering diversity}
+We tabulate the performance according to diversity measures defined in
+the previous section
+\subsubsection{Subtopic recall at $K$}
+
+\begin{table}[h]
+\centering
+\begin{tabular} {|c | c | c | c|c|}
+  \hline
+  Algorithm & $K = 5$ & $K = 10$  & $K = 20$ & $K = 40$ \\
+  \hline
+  Baseline DBpedia & 46.53 & 62.72 & 78.25 & 92.16 \\
+  Category Hierarchy & 39.63 & 52.53 & 68.15 & 83.66 \\
+  Spectral Clustering & 38.30 & 50.52 & 65.74 & 80.32 \\
+  \hline
+  Bisecting K-Means & 40.80 & 53.68 & 68.37 & 84.16 \\
+  Lingo & 45.55 & 56.99 & 65.79 & 82.27 \\
+  Doc Summarizn & 38.97 & 48.90 & 62.72 & 82.14 \\
+  \hline
+  Lingo + Category & 42.30 & 53.37 & 67.92 & 82.7 \\
+  BiK-Means + Abstracts & 40.85 & 54.37 & 68.65 & 86.67 \\
+  \hline
+\end{tabular}
+\caption{Subtopic recall at rank $K$}
+\end{table}
+\subsubsection{Subtopic precision at recall $r$}
+
+\begin{table}[h]
+\centering
+\begin{tabular} {|c | c | c | c|c|}
+  \hline
+  Algorithm & $r = 50$ & $r = 60$  & $r = 70$ & $r = 80$ \\
+  \hline
+  Baseline DBpedia & 48.00 & 39.41 & 32.82 & 27.18 \\
+  Category Hierarchy & 36.21 & 30.36 & 24.27 & 21.58 \\
+  Spectral Clustering & 38.30 & 32.24 & 26.22 & 23.53 \\
+  \hline
+  Bisecting K-Means & 41.42 & 31.45 & 26.82 & 22.56 \\
+  Lingo & 39.28 & 31.32 & 27.03 & 22.10 \\
+  Doc Summarizn & 34.94 & 26.88 & 23.55 & 20.40 \\
+  \hline
+  Lingo + Category & 39.03 & 29.53 & 24.83 & 21.53 \\
+  BiK-Means + Abstracts & 40.39 & 28.42 & 26.89 & 22.30 \\
+  \hline
+\end{tabular}
+\caption{Subtopic precision at recall $r$}
+\end{table}
+The values above indicate that the Baseline DBPedia system performs
+best among all the systems when it comes to cluster diversity.
+\newpage
+\subsubsection{Plots of subtopic recall and subtopic precision}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.5]{recall.pdf}
+  \caption{Subtopic recall plots at various $K$}
+  \label{fig:recall}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.5]{precision.pdf}
+  \caption{Subtopic precision plots at various $r$}
+  \label{fig:recall}
+\end{figure}
+
+
+\chapter {Discussion of results and conclusion}
+We discussed the algorithm, implementation and performance of two
+moderately successful knowledge based systems to cluster search
+results. We discussed two self contained systems which did not require
+any external knowledge. We implemented two hybrid methods, one of
+which yielded marginal improvements in clustering quality performance.
+
+After studying the results of evaluation we have the following
+observations to make:
+
+\begin{itemize}
+  \item Clustering quality ($F1$ measure) seems to increase with
+    incorporation of knowledge. The $F1$ measure of Category hierarchy
+    method improved significantly over the baseline DBPedia method
+    indicating that the background knowledge from the Category
+    structures was useful in relating snippets.
+
+  \item The performance of Spectral clustering method turned out to be
+    slightly disappointing when compared with other systems. We can
+    explain this away by noting following facts:
+    \begin{enumerate}
+      \item Many of the senses of ambiguous query terms had fine-grain
+        distinctions which are related to a lot of common Wikipedia
+        entities between them. 
+      \item For example, consider the query term
+        \verb|Wizard of the Oz|. The Wikipedia articles of
+        \verb|Wizard_of_the_Oz_(novel)| and
+        \verb|Wizard_of_the_Oz_(film)| are likely to be linked by a
+        large number of common Wikipedia entities, thus making it
+        difficult for the spectral algorithm to distinguish between
+        the two.
+    \end{enumerate}
+  \item In the implementation of Category hierarchy based system, we
+    had a problem of excess of dealing with thousands of Categories
+    for each entity tagged in the snippet. This might have contributed
+    to the noise in the system thus reducing the Jaccard Index
+    performance of the system. There is a scope for improving its
+    performance by devising a way to filter out semantically useful
+    categories from the thousands.
+  \item To be able to build systems which can truly exploit the
+    semantic knowledge, a more comprehensive Ontology which maps the
+    real life notions onto Wikipedia entities is required. For
+    example, from the current category structure of Wikipedia, the
+    machine can only deduce that \verb|Albert_Einstein| and
+    \verb|Physics| are somehow related. But it can never be able to
+    deduce that Einstein is related to Physics by virtue of having
+    engaged in a `mental process' which enabled him to make a
+    `contribution' to a `field' known as `Physics'. 
+\end{itemize}
+
+To conclude, we focused in this thesis on improving the performance of
+clustering search snippets by exploiting knowledge resources. But we
+could only marginally improve the performance due to the reasons
+mentioned above.
+
+ \bibliographystyle{plain}
+ \bibliography{Ref}
+
+
+
+
+
+\end{document}
+
+%%  LocalWords:  Aggomerative

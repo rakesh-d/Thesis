@@ -1,0 +1,1186 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{iitbtitle}
+\usepackage{a4wide}
+\usepackage{anysize}
+\usepackage{iitbcs}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{epsfig}
+\usepackage{tabls}
+%\usepackage[dvips]{color}
+\usepackage{graphicx}
+\usepackage{tikz,anysize}
+\usepackage{float}
+\usepackage{verbatim}
+\marginsize{2.5cm}{2.5cm}{1cm}{1.5cm}
+\def\baselinestretch{1.15}  
+\usepackage{url}                        
+\usepackage{multirow}
+\usepackage{epigraph}
+\usepackage{amsmath}
+
+\newcommand\INPUT{\item[\textbf{Input:}]}
+\newcommand\OUTPUT{\item[\textbf{Output:}]}
+%% \usepackage{algorithm}% http://ctan.org/pkg/algorithms
+%% \usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
+
+
+%theorum lemma environment 
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\hfill $\square$\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\qed}{\nobreak \ifvmode \relax \else
+      \ifdim\lastskip<1.5em \hskip-\lastskip
+      \hskip1.5em plus0em minus0.5em \fi \nobreak
+      \vrule height0.75em width0.5em depth0.25em\fi}
+
+
+
+\begin{document}
+
+%% %\baselineskip 20pt
+%% %The definitions
+%% \def\title{Word Sense Induction, Disambiguation for Search Result organization }
+%% \def\what{M. Tech. Thesis}
+%% \def\degree{Master~of~Technology}
+%% \def\who{Rakesh Dhanireddy}
+%% \def\roll{10305069}
+%% \def\guide{Prof. Ganesh Ramakrishnan, Prof. Saketha Nath}
+
+%% \titlpage
+%% \def\bsq{\begin{flushright} $\blacksquare$\\ \end{flushright}}
+%% \def\tab{\hspace{5mm}}
+
+%% %The stuff
+%% \pagenumbering{roman}
+ 
+%% \newpage
+
+%% \begin{center}
+%%  \textbf{Declaration}
+%% \end{center}
+%% I declare that this written submission represents my ideas in my own
+%% words and where others ideas or words have been included, I have
+%% adequately cited and referenced the original sources. I also declare
+%% that I have adhered to all principles of academic honesty and
+%% integrity and have not misinterpreted or fabricated or falsified any
+%% idea/data/source in my submission. I understand that any violation of
+%% the above will call for disciplinary action by the institute and can
+%% also evoke penal action from the sources which have thus not been
+%% property cited or from whom proper permission has not been taken when
+%% needed.
+%%    \vspace{1cm}
+%%  \begin{flushright}
+%%  \rule{150pt}{1pt}\\ 
+ 
+%%  Signature\\
+%%  \vspace{1cm}
+%%  \rule{150pt}{1pt} \\
+ 
+%%  Name\\
+%%  \vspace{1cm}
+%%  \rule{150pt}{1pt} \\
+ 
+%%  Roll Number\\
+ 
+%%  \end{flushright}
+ 
+%%  \begin{flushleft}
+%%  Date: \rule{150pt}{1pt} \\
+%%  \vspace{1cm}
+  
+%%  Place: \rule{150pt}{1pt} \\
+%%  \end{flushleft}
+
+
+
+
+
+%% \newpage
+
+
+%% \begin{abstract}
+%% The tasks of Word Sense Disambiguation / Induction are broadly defined
+%% as computational determination of the particular ``sense'' implied by
+%% the usage of a given word in a given context. Due to the simplicity of
+%% the problem statement and straight forward methods of evaluation,
+%% these tasks have been subject to intense research activity which
+%% resulted in the development of a number of techniques to tackle them
+%% with respectable success. Despite their theoretical importance, there
+%% has not been much progress by way of adopting these techniques in real
+%% applications. In this thesis we apply these methods and evaluate their
+%% efficacy in the context of Information Retrieval. We apply
+%% disambiguation techniques to the problem of organizing the search
+%% engine results by associating each of them to semantically meaningful
+%% topics, which helps the user of the search engine quickly identify and
+%% reach the Search Results corresponding to the particular sense of the
+%% query he is interested in. We studied diverse approaches in tackling
+%% this problem -- those which don't use any external knowledge source,
+%% those which use raw knowledge in the form or corpora, those which use
+%% organized knowledge sources like Wikipedia. We discuss the Wikipedia
+%% based systems in depth as they have not been as thoroughly studied as
+%% the others in the literature surveys. In particular we study the
+%% effect of exploiting the information mined from Wikipedia article
+%% abstracts, Category structure and the Network structure of the links
+%% between Wikipedia articles.
+%% \end{abstract}
+
+
+%% \newpage
+
+%% \listoftables
+
+%% \newpage
+
+%% \begingroup\def\thispagestyle#1{}\def\baselinestretch{1.5}\tableofcontents\endgroup    
+%% \newpage
+\pagenumbering{arabic}
+
+\section{Organization of the report}
+
+The summary of final report is as follows:
+\begin{itemize}
+ \item {\bf Introduction} - Introduction section discussing the
+   motivation of applying WSI/WSD in context of search result
+   clustering. 
+ \item {\bf Problem statement} - Precise statement of the search
+   result clustering task of SemEval-2013 and description of
+   evaluation methods adopted
+ \item {\bf Various solution approaches} - A brief overview of the
+   various algorithms that can be used to solve the task using the
+   classification framework given in
+   Figure~\ref{fig:classify}.
+ \item {\bf Algorithm Descriptions}
+   \begin{itemize}
+     \item {\bf Self Contained systems} - Methods which use only the
+       syntactical features of the snippets and don't require any
+       external knowledge such as:
+       \begin{itemize}
+         \item \underline{Classical clustering methods} - {\it
+           Bisecting K-Means, Agglomerative Hierarchical Clustering}
+           etc. \cite{clusteringCompare}
+         \item \underline{Suffix tree methods} - Those which use suffix trees of
+           most frequently used phrases like STC\cite{Zamir} and
+           Lingo\cite{Weiss} which improvises it using SVD.
+         \item \underline{Document summarization} - Applying document
+           summarization techniques by considering the concatenated
+           snippets as a single document \cite{Bilmes}
+       \end{itemize}
+    \item {\bf Knowledge based systems} - Methods which use external
+      knowledge in addition to the syntactic features of the
+      snippets. They consist of:
+    \begin{itemize}
+      \item \underline{Raw corpus based methods} - Using features extracted from
+        raw corpuses like Ngram datasets like the {\it Hyperlex}
+        \cite{hyperlex} and {\it WSI} \cite{navigli}
+      \item \underline{Organized knowledge based or `Ontology' based} - Systems
+        which exploit the manually compiled knowledge bases such as
+        Wiki in inferring the semantic context of the snippets.
+        Various systems based on features mined from the Wiki:
+        \begin{itemize}
+          \item \underline{Abstract based} - Entities in snippets are tagged with
+            additional information extracted from Wiki abstracts.
+          \item \underline{Category hierarchy based} - Each entitiy in a snippet
+            is supplemented with the Category hierarchy information from
+            DBpedia. 
+          \item \underline{Link structure based} - Each snippet is modeled as a
+            set of entities and the similarity measure between various
+            snippets is defined based on the network structure of
+            links between the entities. The final graph obtained is
+            clustered using Spectral techniques. \cite{Ferragina}
+        \end{itemize}
+     \end{itemize}
+    \item {\bf Combinations} - We explore various combinations of
+      above ideas such as
+      \begin{itemize}
+        \item Bisecting K-Means + Category info
+        \item Lingo + Category info or Abstract info
+        \item Link structure + Category hierarchy info
+      \end{itemize}
+  \end{itemize}
+  \item {\bf Evaluations} - Discussion of the results of evaluation
+     of the systems on SemEval-2013 test dataset. 
+  \item {\bf Conclusions} - Conclusions of the experiments and
+     pointers to further work.
+\end{itemize}
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.5]{graph.pdf}
+  \caption{Classification of the clustering methods}
+  \label{fig:classify}
+\end{figure}
+
+%% As stated in the introduction, the aim of this project is to find a
+%% real world application for exploiting the techniques developed in the
+%% context of the traditional WSD/WSI({\it in vitro} task). As depicted
+%% in the Figure~\ref{fig:classify}, basic approaches to the problem of
+%% search result organization can be broadly categorized as:
+%% \begin{itemize}
+%%   \item {\it Self Contained}
+%%   \item {\it Knowledge Based}
+%% \end{itemize}
+
+%% \subsection{Self Contained systems}
+
+%% {\it Self Contained} systems take the snippets as input and organize
+%% them into various meaningful clusters with the help of syntactical
+%% features extracted from the snippets as their only guide. They don't
+%% need any prior knowledge concerning the subjects of the snippets or
+%% the query. Almost all of the systems in the literature which attempted
+%% to solve this problem in the late 90s and early 2000s belong to this
+%% category. The primary advantage of these systems being that they are
+%% designed to be efficient keeping in mind the response times expected
+%% of search engines. Given that the amount of data to be processed by
+%% these systems (typically of the order of the first few 100s of
+%% snippets) is small, they can be easily made to fulfill the efficiency
+%% constraints. 
+
+%% These systems can further be classified into following classes:
+%% \begin{itemize}
+%%   \item Classical clustering methods 
+%%   \item Suffix tree based methods
+%%   \item Document summarization methods
+%% \end{itemize}
+
+%% {\it Classical clustering methods} adopt the well known clustering
+%% algorithms like K-Means clustering, Bisecting K-Means, Agglomerative
+%% Hierarchical clustering to the snippet clustering problem. These serve
+%% as the baseline systems against which to compare the performance of
+%% more sophisticated systems. In our thesis, we discuss the Bisecting
+%% K-Means algorithm (which is the best performing among these)
+%% \cite{CompClustering} and its results on the test dataset.
+
+%% {\t Suffix tree methods} were first proposed in \cite{Zamir} and were
+%% shown to improve the performance by significant measure compared to
+%% the classical clustering algorithms. These systems typically extract
+%% most frequent phrases among all the snippets (using Suffix tree
+%% data structure for speed) and clusters the snippets based on the
+%% occurrence of phrases. Lingo algorithm further improves upon this idea
+%% by employing Singular Valued Decomposition (SVD) to extract meaningful
+%% `topics' from the snippets.\cite{Weiss} We discuss the implementation
+%% and performance details of the Lingo algorithm on our test dataset.
+
+%% Finally we discuss {\it Document summarization} techniques which have
+%% been originally proposed to solve the problem of providing a useful
+%% summary of long documents. We suggest that these can be adapted to the
+%% problem of search result organizing by concatenating all the snippets
+%% to form a single document and applying summarization techniques on
+%% it. We implement the algorithm based on \cite{Bilmes} and evaluate the
+%% results obtained on the test dataset.
+
+
+%% \subsection{Knowledge based systems}
+
+%% Self contained systems discussed so far have one primary disadvantage
+%% -- they use purely syntactic features {\it ie} words of an ambiguous
+%% natural language like English. The systems have no clue of the
+%% background knowledge that humans extensively use in tackling these
+%% kind of problems. For example, consider the following two snippets:
+
+%% \begin{itemize}
+%%   \item \begin{verbatim}The official Twitter page of Guy Kawasaki. Follow for
+%%     live updates!\end{verbatim}
+%%   \item \begin{verbatim}The official Twitter page of Kawasaki Motors. Follow for
+%%     live updates! \end{verbatim}
+%% \end{itemize}
+
+%% The methods which rely on syntactic similarity are highly likely to
+%% group these two snippets under a single cluster as their inter-snippet
+%% similarity is very high even if they are talking about completely
+%% unrelated entities.
+
+%% Thus we can see that there is a scope for improvement in the
+%% performance of clustering systems if they can be made to `know' what
+%% entities the snippets are talking about. Given the lack of a universal
+%% repository of knowledge of various entities, scarce computing power in
+%% the late 90s, Self Contained systems attracted the most attention of
+%% researchers. Now that the computing power has improved exponentially
+%% and accurate knowledge repositories like Wikipedia have proliferated
+%% in the past decade, there is no reason to limit ourselves to syntactic
+%% similarity. Hence we devote a significant part of our thesis to
+%% exploring the effect of incorporating external knowledge into these
+%% snippet clustering systems. We now discuss the various methods we
+%% tried to extract and exploit the knowledge from various sources to
+%% improve the clustering performance.
+
+%% WSI/WSD systems can be classified into two categories, based
+%% on the type of `knowledge' used:
+%% \begin{itemize}
+%%   \item {\it Organized Knowledge or `Ontology' based methods}
+%%   \item {\it Raw Corpus based methods (unsupervised)}
+%% \end{itemize}
+
+%% Organized knowledge based methods depend upon manually compiled
+%% `dictionaries' or other analogous knowledge sources like `ontologies'
+%% to retrieve the various senses corresponding to an ambiguous query and
+%% try to choose a particular sense among them which best fits a given
+%% context. Most of the WSD methods which use Wordnet fall under this
+%% category.
+
+%% On the other hand Unsupervised methods try to infer the sense of an
+%% ambiguous word by clustering the word co-occurrences in different
+%% contexts, in a large corpus. Different clusters correspond to
+%% different senses of the word. Any cluster of words is understood to
+%% imply a particular `sense' of the word.
+
+%% For our problem of organizing search results, we have discuss two
+%% solutions corresponding to each of the above two categories --
+%% Ontology based and Corpus based, which we discuss below. 
+
+%% The basic skeleton of the methods used in the two approaches is shown
+%% in the following diagram. The green box in the diagram represents a
+%% `Knowledge source' which can either be an Ontology or a Corpus in our
+%% methods. 
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[scale=0.3]{Blockdia.pdf}
+%%   \caption{Block diagram of the clustering methods}
+%% \end{figure}
+%% \subsubsection{Wikipedia based methods (Ontology based)}
+%% For a system to be able to disambiguate terms, it must possess the
+%% prior knowledge of all the senses in which those terms are used. WSD
+%% systems have typically used Wordnet or other manually compiled
+%% dictionaries as Knowledge Sources for the senses. In the context of
+%% our problem of query disambiguation, it is easily recognized that
+%% these dictionaries are inadequate primarily due to two reasons:
+%% \begin{itemize}
+%%   \item Static nature of the dictionary -- whereas web queries are
+%%     essentially dynamic with new terms and phrases being coined
+%%     virtually everyday.
+%%   \item Paucity of Proper Nouns in the dictionary -- A high percentage
+%%     of web queries are proper nouns {\it ie.} names of places, persons
+%%     and things. Clearly the conventional dictionaries are lacking in
+%%     such entities.
+%% \end{itemize}
+
+%% From the above analysis it is clear that we need a Knowledge
+%% Source which is dynamic ({\it ie.} being updated regularly) as well as
+%% containing extensive information about all known {\it entities} and
+%% their relationships. In other words we need a {\it Dynamic Ontology}
+%% capturing all the information about the world. An encyclopedia fits
+%% this role very well. Wikipedia is a free Online encyclopedia
+%% containing over $4$ million articles (English) with hundreds of new
+%% articles being added everyday. Thus it meets our requirements of being
+%% dynamic as well as being extensive in terms of number of entities. 
+
+%% We use DBPedia -- an ontology compiled by mining information from
+%% Wikipedia as the Knowledge Sources of our system for disambiguating
+%% queries. Given an ambiguous query term, our baseline method retrieves
+%% the various entities denoted by the query and the information
+%% associated with them. For a given search result snippet, the system
+%% computes the `similarity' of the snippet to each of the entities and
+%% chooses the entity with maximum similarity. The formal definition and
+%% details of these computations are discussed in Chapter 3. Thus we are
+%% able to associate each result snippet to a known entity from the
+%% ontology. We can now form clusters of result snippets by grouping all
+%% the snippets mapped to a single entity. Representing this procedure in
+%% our block diagram - Figure~\ref{fig:OntClust}
+
+%% Apart from the baseline method, we implemented two different
+%% algorithms which exploit two important datasets of DBPedia:
+%% \begin{itemize}
+%%   \item Category hierarchy structure
+%%   \item Internal link structure
+%% \end{itemize}
+
+%% The {\it Category hierarchy} system exploits the `Category' to which a
+%% given entity belongs. For example by realizing the Wikipedia entity
+%% \verb|Pluto_(Disney)| has the category \verb|Fictional_dogs| we are more
+%% likely to correctly assign a snippet talking about Pluto the dog to
+%% \verb|Pluto_(Disney)| rather than \verb|Pluto| the planet.
+
+%% Similarly the system based on {\it Internal link structure} of
+%% Wikipedia learns to dissociate ambiguously named entities in the
+%% snippet by representing each snippet as a bag of Wiki entities and
+%% exploiting the network properties of the links among those entities.
+
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[scale=0.35]{block_ont.pdf}
+%%   \caption{Block diagram of the Ontological clustering method}
+%%   \label{fig:OntClust}
+%% \end{figure}
+
+%% \subsubsection{Word Sense Induction method (Corpus based)}
+
+%% \epigraph{{\it You shall know a word by the company it keeps}}{John Rupert Firth}
+
+%% Corpus based methods, as indicated by the name, extract all their
+%% knowledge from the raw corpus of documents. Dictionaries are supposed
+%% to be the universal authorities on word senses. However, if we examine
+%% how lexicographers themselves arrive at the word senses, we find that
+%% dictionaries are written on the basis of evidence from language
+%% corpora. Thus one is tempted to consider whether using the corpora
+%% directly to determine the senses might be more effective than using a
+%% dictionary. This line of thinking led to the development of Word Sense
+%% Induction (WSI) methods. One obvious advantage is that the static
+%% nature of the definitions in a dictionary is avoided by this approach.
+
+%% WSI algorithms are unsupervised techniques which seek to discover (or
+%% {\it induce}) various senses denoted by a word with the help of the
+%% information extracted from the various contexts the word occurs in the
+%% corpus. The central assumption of these methods is that a given word,
+%% in a specific sense, tends to co-occur with the same neighboring
+%% words. We use a WSI method based on \cite{navigli} which involves
+%% constructing a {\it co-occurrence graph} of words. The graph is
+%% constructed based on the frequencies of {\it ngrams} of a huge
+%% corpus. (For our experiments we used the freely available Google Books
+%% Ngrams.) Based on the frequencies of the co-occurrence of words in
+%% {\it ngrams} the algorithm tries to locate distinct {\it hubs} in the
+%% graph corresponding to distinct senses. Thus given a search query, the
+%% algorithm extracts various hubs from the graph representing various
+%% senses of the query. For each search result snippet, we assign the hub
+%% which has greatest similarity. Further details of the algorithm are
+%% discussed in the next Chapter. Representing the whole procedure as a
+%% block diagram, we have:
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[scale=0.3]{block_ngram.pdf}
+%%   \caption{Block diagram of Corpus based clustering method}
+%% \end{figure}
+
+%% \chapter{Algorithms and Implementation details}
+
+%% In this section, we give the detailed description of the two
+%% approaches we studied to classify search results. For each approach in
+%% turn, we detail the step-by-step algorithm, tools and packages used
+%% and variations implemented. 
+
+%% \section{Ontology based classification}
+%% As described in the outline in Chapter 2, we use a manually compiled
+%% knowledge source -- an ontology, as a source for retrieving various
+%% senses corresponding to a given query term. An ontology formally
+%% represents knowledge as a set of concepts within a domain, and the
+%% relationships among those concepts. It can be used to reason about the
+%% entities within that domain and may be used to describe the domain. We
+%% have implemented two slightly different versions of this algorithm
+%% with two different ontologies -- YAGO \cite{yago}, DBPedia \cite{dbpedia},
+%% acting as the knowledge sources. We first describe the YAGO version
+%% completely and then summarize the DBPedia version only noting the
+%% important changes from the YAGO version.
+
+%% \subsection{YAGO based classification of search results}
+%% \subsubsection{Introduction to YAGO}
+%% YAGO has been developed to cater to the widespread need for
+%% ontological background knowledge in a variety of modern information
+%% applications such as Semantic Web, machine translation, WSD, query
+%% expansion, document classification. It is an automatically constructed
+%% knowledge base with information mined from Wikipedia. Each article in
+%% Wikipedia corresponds to an {\it entity} in YAGO. Any two entities in
+%% the knowledge base can form a {\it relation}. YAGO has about $100$
+%% manually defined relations such as {\tt wasBornOnDate}, {\tt
+%%   hasEconomicGrowth}, {\tt hasCapital} etc. Each fact in YAGO is
+%% represented as a triple of subject (S), predicate (P) and object (O)
+%% as defined in the standard RDF data model. As a whole YAGO 2 has over
+%% 20 million facts about 2 million entities. In addition to the facts
+%% extracted from Wikipedia articles, YAGO also documents the
+%% hierarchical structure of entities by mining the {\it class}
+%% information from Wikipedia {\it Category} Pages. For example, the
+%% entity {\tt Macintosh} belong to a category {\tt Personal Computing}
+%% which in turn belongs to a category {\tt Office Equipment} which in
+%% turn belongs to the category {\tt Technology}. YAGO infers these class
+%% memberships automatically from Wikipedia and integrates this
+%% information with the taxonomic backbone of WordNet. 
+
+%% \subsubsection{Querying information from YAGO}
+
+%% YAGO provides a SPARQL (recursive acronym for SPARQL Protocol and RDF
+%% Query Language) query interface for querying and extracting the data
+%% desired by user. For our implementation we use Apache Jena Semantic
+%% Web tools which provide various packages to process data stored in RDF
+%% format. To improve the response time for queries we use the YAGO TDB
+%% version which stores the data in Jena TDB format which is a high
+%% performance RDF store. We now provide the results of a sample SPARQL
+%% query to demonstrate the query language and to preview how the YAGO
+%% knowledge can be exploited for disambiguation. We want to know all the
+%% entities which are possibly referred to by the word {\it Pluto}. We
+%% use the following SPARQL query to extract all such entities:
+
+%% \begin{verbatim}
+%%  SELECT * WHERE { ?s rdfs:label "Pluto"}
+%% \end{verbatim}
+%% Now the YAGO TDB store computes all the entities which might be
+%% possibly labeled by the word Pluto and returns them as a list as
+%% follows:
+%% \begin{verbatim}
+%% {s=http://yago-knowledge.org/resource/Pluto}
+%% {s=http://yago-knowledge.org/resource/Pluto_(Disney)}
+%% {s=http://yago-knowledge.org/resource/Plouto}
+%% {s=http://yago-knowledge.org/resource/Pluto_(mythology)}
+%% {s=http://yago-knowledge.org/resource/Homogenic}
+%% {s=http://yago-knowledge.org/resource/Planets_in_astrology}
+%% {s=http://yago-knowledge.org/resource/Pluto_(Astro_Boy)}
+%% {s=http://yago-knowledge.org/resource/Pluto_(Portuguese_band)}
+%% {s=http://yago-knowledge.org/resource/Pluto_(Marvel_Comics)}
+%% {s=http://yago-knowledge.org/resource/Pluto_(New_Zealand_band)}
+%% {s=http://yago-knowledge.org/resource/Pluto_(newspaper)}
+%% {s=http://yago-knowledge.org/resource/Pluto_(EP)}
+%% {s=http://yago-knowledge.org/resource/Pluto_(Canadian_band)}
+%% {s=http://yago-knowledge.org/resource/Pluto,_West_Virginia}
+%% \end{verbatim}
+
+%% \subsubsection{Outline of the algorithm}
+
+%% We adopt the algorithm described in \cite{yagoclust} to implement
+%% search result classification. Given an ambiguous query term and
+%% corresponding search result snippets, the algorithm tries to group and
+%% label similar search results. The important steps in the algorithm are
+%% as follows:
+
+%% \begin{itemize}
+%%   \item Process the search result snippets, perform stemming and
+%%     remove stop words and represent them as vectors in a suitable
+%%     vector space. We refer to them as {\it search result vectors}.
+%%   \item Send the ambiguous query term to YAGO TDB to retrieve all the
+%%     entities which might be related to the query term.
+%%   \item For each of the retrieved entities in the previous step,
+%%     collect all the {\it facts} from YAGO and form an {\it entity
+%%       information vector}.
+%%   \item Using the vector representation of search result snippets and
+%%     YAGO entities, we now calculate similarities between entity info
+%%     vectors and search results so that we can assign each of the
+%%     snippet to an entity with maximum similarity to it.
+
+%% \end{itemize}
+
+%% \subsubsection{Processing the Search results}
+
+%% We are given a list of top 100 web search results from a popular
+%% search engine such as Yahoo. Retrieving the whole documents of search
+%% results and processing them for classification is not feasible because
+%% of the low response time expected of the modern search engines. Hence
+%% we only focus on processing the search result titles and snippets. 
+
+%% Each search result snippet is then processed through a stemming
+%% algorithm (We used Snowball Stemmer in our implementation) so that
+%% words with same roots are not misinterpreted as being different words
+%% due to suffixes. Stop words such as common prepositions, conjunctions
+%% are also removed from the text to avoid noise. We then use the
+%% traditional Information Retrieval model of Term Frequency / Inverted
+%% Document Frequency (TFIDF) to represent each of the snippet as a
+%% numerical vector of word frequency weights in the vector space of
+%% word frequencies.
+
+%% \subsubsection{TFIDF representation of result snippets}
+%% In information retrieval each document is thought of as a vector of
+%% terms, with each unique term representing a different dimension. A
+%% popular way of determining the component weights of a document vector
+%% along the various term dimensions is TFIDF representation. This
+%% weighting scheme assigns to a term $t$ a weight $w(t,d)$ given by 
+%% $$ w(t,d) = TF(t,d) * IDF(t) $$
+%% where $TF(t,d)$ denotes the frequency of the term $t$ in a document
+%% $d$ and $IDF(t)$ denotes the {\it Inverse Document Frequency} which is
+%% calculated as 
+%% $$ IDF(t) = \log \frac{N}{1 + DF(t)} $$
+%% where $N$ denotes the total number of documents in the corpus and
+%% $DF(t)$ denotes the number of documents in which the term $t$ occurs. 
+
+%% The $TF$ part of the weight is motivated by the fact that the
+%% relevance of a document to a particular query term is proportional to
+%% the number of times that term occurs in the document. The $IDF$ term
+%% on the other-hand is to negate the effect of high frequency of
+%% occurrence of certain `common' words. Terms which occur in fewer
+%% documents are more likely to have higher discriminating power than
+%% those which occur everywhere. Hence the $IDF$ term penalizes those
+%% terms which occur in a large number of documents in the corpus. The
+%% $IDF$ term in our experiment is calculated by considering the set of
+%% result snippets as the corpus and each snippet as a document.
+
+%% We now have a broad weighting scheme to represent each of the result
+%% snippet as a vector of words. This scheme can be further specialized
+%% by appropriately modifying the weights to model our intuitive notions
+%% of how important is the role played by term frequencies in determining
+%% the relevance. For example, the weighting of term frequency of a word
+%% in a given snippet is sometimes calculated as a function of raw term
+%% frequency to down-weight the effect of $TF$ in case of long documents.
+%% $$ TF = 1 + \log (TF(t,SR)))$$ where $TF(t,SR)$ is the term frequency
+%% of a term $t$ in a search result $SR$. Also the raw term frequency
+%% method unduly favors large number of occurrences of a single term of a
+%% query over the aggregate small number of occurrences of multiple terms
+%% of the query. The logarithmic function remedies such
+%% situations\cite{BSA93}.
+
+%% We implement multiple variants of snippet vectors according to the
+%% method of term weighting used in the TFIDF representation:
+
+%% \begin{table}[h]
+%% \centering
+%% \begin{tabular} {|l | c || l | c|}
+%%   \hline
+%%   \multicolumn{2}{|c||}{Term Frequency} & \multicolumn{2}{|c|}{Inverse
+%%     Document Frequency} \\
+%%   \hline
+%%   natural & $TF$ & no & 1 \\
+%%   logarithmic & $1 + \log (TF)$ & full & $\log \frac{N}{DF}$ \\
+%%   augmented & $0.5 + \frac{0.5 * TF}{\max TF}$ & & \\
+%%   \hline
+%% \end{tabular}
+%% \end{table}
+
+%% \subsubsection{Normalization}
+
+%% We now have each search result represented as a vector of term
+%% frequencies. As explained earlier we combine the terms of the title
+%% and snippet to form the search result vector. As a result there is a
+%% possibility that search result vectors have very different
+%% `lengths'. This is not desirable because when we calculate similarity
+%% between the search results and entities longer search results might
+%% dominate over the smaller ones. Hence we normalize each of the search
+%% result vectors by dividing them by their lengths.
+
+%% A straight forward method to calculate the lengths of a document is to
+%% get the $l^2$-norm considering it as an euclidean vector in a large
+%% dimensional space. This normalization is referred to as ``cosine
+%% normalization''. Thus the length of a search result vector
+%% $(t_1,t_2,...,t_n)$ is calculated as $\sqrt{t_1^2 + t_2^2 + ... +
+%%   t_n^2}$. However, this normalization is not quite ideal as explained
+%% further. 
+
+%% \subsubsection{Pivoted Normalization}
+
+%% In order to get an effective estimate of the dependence of document
+%% length on relevance, experiments have been carried out which plot the
+%% distribution of relevant documents along various lengths of the
+%% documents (for this experiment documents whose relevance was
+%% established manually were used). Most experiments yielded a non-linear
+%% curve in which probability of document relevance increases
+%% significantly at high document lengths \cite{amit}. In comparison, the
+%% distribution of lengths of documents retrieved by a system using
+%% cosine normalization is found to be much less steep with shorter
+%% length documents being favored much more than in case of relevant
+%% documents. An approximate illustration of distribution of relevant
+%% document lengths versus retrieved document lengths (using cosine norm)
+%% is given by the following figure.
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[scale=0.4]{relev.pdf}
+%%   \caption{Comparison of distributions of relevant documents and
+%%     retrieved documents}
+%% \end{figure}
+
+%% The dotted green curve in the figure represents the distribution of
+%% lengths of relevant documents and the solid red curve represents the
+%% distribution of lengths of documents retrieved by a system using
+%% cosine normalization. The x-coordinate of the point of intersection of
+%% the two curves is labeled as `Pivot' in the figure. Clearly the
+%% distribution of retrieved documents is much flatter compared to that
+%% of relevant documents.
+
+%% It has been hypothesized in paper \cite{amit} that an effective
+%% normalization scheme should yield a distribution of lengths of
+%% retrieved documents which is close to the distribution of lengths in
+%% actual relevant documents. So in an effort to invent an ideal norm,
+%% the paper proposes to modify the cosine normalization factor (the
+%% quantity by which we divide the unnormalized vector) such that the gap
+%% between the distributions of relevant and retrieved documents
+%% is minimized. For this we need to penalize the cosine norm factor for
+%% shorter lengths, {\it ie} before the pivot, and boost the factor for
+%% larger lengths, {\it ie} after the pivot.
+
+
+%% We could achieve the desired effect by modifying the old cosine
+%% normalization factor such that it is larger before the pivot and
+%% smaller after the pivot. This is illustrated in the following figure
+%% as tilting the line representing normalization factor while holding it
+%% tight at the pivot.
+
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[scale=0.4]{pivnorm.pdf}
+%%   \caption{Modification of the cosine norm by rotating around the {\it pivot}}
+%% \end{figure}
+
+%% The new normalization we obtained by the above procedure is called
+%% {\it pivoted normalization}. It overcomes the bias of cosine norm for
+%% shorter length documents and closely matches the length distribution
+%% of relevant documents when used by a retrieval system. Assuming that
+%% the $slope$ and $pivot$ are experimentally determined the pivoted
+%% normalization and the TFIDF document vector using it are algebraically
+%% expressed as follows:
+%% $$
+%%       pivNorm = (1 - slope)*pivot + slope*(oldNorm)
+%% $$
+
+%% Since multiplying the norm by a constant doesn't affect the relative
+%% ranking among documents, we can divide the right hand side by
+%% $pivot$. The paper also suggests from experimental evidence that we
+%% could substitute the value of {\it average old norm} over all document
+%% vectors which has a meaningful interpretation -- {\it average old
+%%   norm} is `appropriate' and thus remains unaffected whereas other
+%% lengths are affected by a single parameter $slope$ which reflects our
+%% belief in the appropriateness of the old norm. Thus incorporating
+%% above changes we get the expression for pivoted normalization:
+%% $$
+%%      pivNorm = (1 - slope) + slope * \frac{oldNorm}{avgoldNorm}
+%% $$
+
+%% We use pivoted normalization for various values of the parameter
+%% $slope$ to normalize the search result vectors for our experiments.
+
+%% \subsubsection{Retrieving entities and facts from YAGO}
+
+%% We now detail the next step in our algorithm of classifying search
+%% results -- retrieving various entities corresponding to different
+%% `senses' of a given query from the YAGO knowledge base. The first step
+%% is to query YAGO for all entities using the {\tt MEANS} relation as
+%% illustrated in the earlier subsection named ``Querying YAGO''. As
+%% demonstrated, it returns a list of entities corresponding to the query
+%% term. These are the concepts against which we `compare' each of the
+%% search results to determine if any of the search result is in fact
+%% talking about one of them. Thus for the purpose of `comparison' we
+%% need some facts about each of those entities in the form of text
+%% strings so that a machine could process the similarity between the
+%% `fact set' of an entity and a given search result.
+
+%% We now describe a sample query to demonstrate how we retrieve facts
+%% about each of the entities. Let the query term be {\tt Jaguar} and let
+%% {\tt con} represent one of the concepts generated in the first
+%% step. Then the facts about the entity {\tt con} are retrieved using
+%% the following SPARQL query. From among the Subject-Predicate-Object
+%% triples stored in the YAGO, the query asks for the `Objects' (facts)
+%% about the `Subject' {\tt con}:
+%% \begin{verbatim}
+
+%% query = "SELECT DISTINCT ?o WHERE {<" + con.obj.toString() + "> ?p ?o }"
+
+%% \end{verbatim}
+%% A sample result of the query for a particular instance of {\tt con},
+%% in this case a luxury car company is as follows:
+%% \begin{verbatim}
+%%  <resource/wikicategory_Car_manufacturers>                                 
+%%  <resource/wikicategory_Luxury_motor_vehicle_manufacturers>                
+%%  <resource/wordnet_company_108058098>                                      
+%%  <resource/wikicategory_British_brands>                                    
+%%  <resource/wikicategory_Companies_based_in_the_West_Midlands_(county)>     
+%%  <resource/wikicategory_Motor_vehicle_manufacturers_of_the_United_Kingdom> 
+%%  <resource/wikicategory_Luxury_brands>                                     
+%%  <resource/wikicategory_Coventry_motor_companies>                          
+%%  <resource/wikicategory_Companies_established_in_1922>                     
+%%  "Jaguar Cars"                                                                                       
+%%  "http://www.jaguar.com/"                                                                            
+%%  "http://en.wikipedia.org/wiki/Jaguar_Cars"                                                          
+%%  "10000"                                                                                             
+%%  "1922-09-04"                                                                                        
+%%  "Jaguar"                                                                                            
+%%  "Jaguar automobile"                                                                                 
+%%  "Jaguar Cars Ltd."
+%%  "Jaguar Cars Limited"
+%% \end{verbatim}
+%% The above result is processed to extract various keywords such as {\tt
+%%   Car, Manufacturer, British, Luxury, Brand, Coventry} etc. and stored
+%% as the `fact set' corresponding to the entity {\tt Jaguar Cars}.
+
+%% \subsubsection{Additional entities}
+%% In addition to the concrete entities retrieved by the {\tt MEANS}
+%% query, the paper \cite{yagoclust} suggests us to retrieve some more
+%% abstract entities as detailed by the algorithm below. The paper
+%% classifies entities as being either {\tt Abstract Concepts} or {\tt
+%%   Concrete Concepts}. (We use slightly different terminology from the
+%% paper for the purpose of clarity) An entity is recognized as abstract
+%% if its label in YAGO matches exactly with the query term. For example,
+%% if the query term is {\tt Beagle}, different entities are retrieved
+%% from YAGO such as {\tt Beagle}, {\tt Beagle\_(Disney)}, {\tt
+%%   Beagle\_HMS} etc. Among these only {\tt Beagle} is classified as
+%% being abstract. The abstract concept is used by the algorithm
+%% described below to retrieve some more entities to add to the existing
+%% concrete entities. 
+
+%% \begin{verbatim}
+%% getAbstractEntites(AC, entList) {
+%%     // AC - Abstract Concept, entList - entityList
+%%     if (AC hasType con) {
+%%       Add each of such con to entList;
+%%       get facts about con;
+%%     }
+%%     if (con subClassOf AC) {
+%%       Add each such con to entList;
+%%       get facts about con;
+%%     }
+%%     if (AC subClassOf con) {
+%%       Get all the children of con;
+%%       Add them to entList;
+%%       get facts about children;
+%%     }
+%% }
+%% \end{verbatim}
+
+%% Each of the {\tt if} statements in the pseudo-code represents a specific
+%% SPARQL query retrieving entities having a specific relationship to the
+%% $AC$. Thus in the first step we add all those entities of whose type
+%% $AC$ belongs. For example, for the $AC$ {\tt Albert Einstein} we get
+%% all the type entities to which it belongs such as {\tt German Nobel
+%%   laureates}, {\tt Jewish refugees} etc. In the second step we add all
+%% those entities which are children classes of $AC$ in YAGO class
+%% hierarchy. For example let {\tt Indian Poets} be the $AC$. Then the
+%% second step adds various child classes such as {\tt Indian English
+%%   Poets}, {\tt Hindi Poets}, {\tt Tamil Poets} etc. The final {\tt if}
+%% statement adds all those entities which correspond to `peer classes'
+%% of the $AC$ entity. Continuing with our example, {\tt Indian Poets}
+%% belongs to the super class {\tt Poets}. All the children of {\tt
+%%   Poets} such as {\tt American Poets}, {\tt French Poets} etc. get
+%% added to the entity list.
+
+%% Now we have a list of entities and facts associated with them. For
+%% each entity we form an entity information vector composed of keywords
+%% extracted from the facts retrieved from YAGO. We then move to the
+%% final step of classification of search snippets by comparing them
+%% against the retrieved entities.
+
+%% \subsubsection{Classification of search results}
+%% The representation of entity information vectors is similar to that of
+%% search result vectors -- they are composed of stemmed keywords
+%% extracted from facts about the entity. For the example given above, we
+%% include all keywords such as {\tt car, manufacturers, luxury, brand,
+%%   British, Coventry, west midlands}. The components of the vector are
+%% given by term frequencies. IDF, normalization are ignored for these
+%% vectors.
+
+%% The categorization of each search result ($SR$) is done as follows:
+%% \begin{itemize}
+%%    \item we first calculate the similarity of the $SR$ to each of the
+%%      entity vectors in the list we retrieved from YAGO as the inner
+%%      product between the TFIDF representation of $SR$ and $ent$:
+%%      $$ sim(SR, ent) =  \langle SR, ent \rangle $$
+%%      $SR$ will be categorized to the $ent$ with maximum $sim$ value if
+%%      the $sim$ value is greater than a threshold value $T$.
+%%     \item The threshold value $T$ is set during the training phase so
+%%       by using the criterion that the selected value of $T$ should
+%%       lead to the maximum $F1$ (refer Evaluation chapter) value among
+%%       the training set. At the end of this step, all those $ent$s
+%%       with no $SR$s assigned to them are discarded.
+%%      \item For each of the uncategorized $SR$ (due to $sim$ being less
+%%        than threshold), we find the $ent$ which is most similar among
+%%        the remaining $ents$ and assign the $SR$ to it.
+%% \end{itemize}
+
+%% We discuss the results and evaluation of the performance of our
+%% implementation of the algorithm in the next chapter. We now
+%% discuss another implementation of the same algorithm which uses
+%% DBPedia as the knowledge source instead of YAGO.
+
+%% \subsection{DBPedia based classification of search results}
+%% DBPedia is another ontological knowledge source with facts mined from
+%% Wikipedia. Unlike YAGO which integrates the entire knowledge into a
+%% single huge graph of RDF triples, DBPedia has multiple sets of
+%% data-sets corresponding to each of the structural elements of Wikipedia
+%% such as Info-boxes, Abstracts, Category Pages, Disambiguation Pages
+%% etc. For our purpose we use Disambiguation dataset and Abstracts
+%% dataset. We follow a similar approach to the one used in YAGO based
+%% implementation. Thus we only note the details where the algorithm
+%% differs. The search results are processed to form TFIDF vectors as
+%% before.
+
+%% \subsubsection{Extraction of entities}
+%% The Disambiguation dataset of DBPedia consists of the data extracted
+%% from Disambiguation pages in Wikipedia which serve to disambiguate
+%% ambiguous titles of articles. The ambiguous terms of the input query
+%% are used to query the Disambiguation dataset to obtain a list of
+%% entities which form the set of all the possible entities intended by
+%% an ambiguous term.
+
+%% \subsubsection{Formation of entity vectors}
+%% To get facts about each of the entities retrieved in the previous step
+%% we use the Abstracts dataset. Abstracts of Wikipedia articles provide
+%% a concise description of the entities with all the necessary keywords
+%% associated with the entity. Thus they constitute a perfect source for
+%% the facts about entities. We extract abstracts of the each of the
+%% entities in the list by querying the Dataset. We process the Abstracts
+%% in much the same way as search results to form TFIDF entity vectors
+%% corresponding to each of the entities.
+
+%% \subsubsection{Classification of search results}
+%% Having formed the TFIDF vector representations of both search results
+%% and entities, we now compute the similarity and classify the search
+%% results in a manner similar to that of YAGO based method.
+
+%% We evaluate and compare both the versions -- DBPedia, YAGO based in
+%% the next chapter.
+
+%% \chapter{Evaluation of ontology based methods}
+%% In order to test our categorization, we need a gold standard
+%% classification in which all the search results for a set of ambiguous
+%% queries have been manually categorized. We use AMBIENT dataset from
+%% \cite{navigli} which consists of manually categorized search results
+%% for a variety of ambiguous query terms. We measure the performance of
+%% our system against the gold standard in terms of {\it precision,
+%%   recall} and {\it F1}. We initially calculate precision for each
+%% category $p_i$ as the fraction of correctly categorized search results
+%% in the category. Similarly the recall $r_i$ for a given category is
+%% measured as the ratio of number of correctly categorized results to
+%% the actual number of results which should belong to that category. Let
+%% the total number of results categorized to $i^{th}$ category be $Q_i$
+%% and the total number of categorized results be $Q$. Then the total
+%% precision, recall, F1 for a given ambiguous query are calculated as:
+%% \begin{align}
+%% precision &= \sum_i p_i * (\frac{Q_i}{Q}) \\
+%% recall &= \sum_i r_i * (\frac{Q_i}{Q}) \\
+%% F1 &= \frac{2*precision*recall}{precision + recall}
+%% \end{align}
+%% The higher the value of $F1$ we get the more effective our
+%% categorization. 
+
+%% All these measures are averaged over the test set of queries to report
+%% the overall performance of the system.
+
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[scale=0.21]{prec.pdf}
+%%   \caption{Precision as a function of threshold}
+%% \end{figure}
+%% \begin{figure}[h]
+%%   \centering
+%%   \includegraphics[scale=0.21]{rec.pdf}
+%%   \caption{Recall as a function of threshold}
+%% \end{figure}
+%% \begin{figure}[h!]
+%%   \centering
+%%   \includegraphics[scale=0.21]{fone.pdf}
+%%   \caption{F1 as a function of threshold}
+%% \end{figure}
+
+
+%% \subsubsection{Setting the threshold}
+%% We now use various threshold values and plot the performance of
+%% the system as a function of threshold over a training set of
+%% queries. The final threshold value for the system is selected as that
+%% which maximizes the performances. For the YAGO based system we used
+%% threshold values ranging from 0 to 250 and the performance of the
+%% system is shown in the following curves. Thus we choose the value of
+%% 60 which yields maximum F1 value over training set of queries as our
+%% threshold. 
+
+
+
+
+%% \section{Evaluation of YAGO based system} 
+%% The YAGO based clustering system is evaluated using the AMBIENT
+%% dataset of ambiguous queries and results. The sense association
+%% returned by our system is compared against the gold standard
+%% association defined by the dataset and the performance is expressed in
+%% terms of precision, recall and F1 measures as defined above.
+
+%% We ran our system for a set of 10 ambiguous queries. The average
+%% precision observed was 40.4, average recall 45.2, average F1 42.4. The
+%% performance of the system is sub-par because of some concrete reasons
+%% which we list below.
+
+%% \subsubsection{Interpretation of results}
+%% The major dent in the performance was caused due to the missing
+%% entities in YAGO. For example, for the query term {\tt Beagle} the
+%% sense {\it Beagle breed of dogs} is missing. But a fairly large number
+%% of search results for the query are about the dog breed causing a
+%% severe hit on the performance of the system. Similarly, for the query
+%% term {\tt Jaguar} YAGO doesn't have an entity corresponding to the
+%% important sense of {\it Jaguar -- the big cat species} which again
+%% results in bad performance of the system. We report our performance by
+%% ignoring those cases in which the missing entity results in $ < 10$
+%% precision values. 
+
+%% We tried to address this issue by using DBPedia system instead of
+%% YAGO, whose performance we now discuss.
+
+%% \section{Evaluation of DBPedia based system}
+%% We follow essentially same procedure in setting the threshold and
+%% classifying each of the search results. The results for the case of
+%% DBPedia system are summarized in the table below:
+
+
+%% \begin{table}[h]
+%% \centering
+%% \begin{tabular} {|c | c | c | c|}
+%%   \hline
+%%   Query Term & Precision & Recall & F1 \\
+%%   \hline
+%%   Zodiac & 89.1 & 80.0 & 84.3 \\
+%%   The Little Mermaid & 69.1 & 18.3 & 29.0 \\
+%%   Monte Carlo & 77.4 & 41.6 & 54.1 \\
+%%   Matador & 64.4 & 44.7 & 52.8 \\
+%%   Jaguar & 91.4 & 32.5 & 47.9 \\
+%%   Indigo & 56.5 & 27.7 & 36.9 \\
+%%   Coral Sea & 74.0 & 51.1 & 60.4 \\
+%%   Beagle & 25.3 & 20.4 & 22.2 \\
+%%   \hline
+%% \end{tabular}
+%% \caption{Sample performance of DBPedia based system}
+%% \end{table}
+
+%% Recall values for various queries are substantially lower than
+%% precision. In some cases such as {\tt Beagle} the previously discussed
+%% issue of missing entities still applies. This time the entity missing
+%% is {\it HMS Beagle -- the ship used by Darwin in his voyage around
+%%   South America}. 
+
+%% \chapter{Unsupervised / Corpus based method}
+%% We now discuss an unsupervised method to disambiguate query terms
+%% which does not depend upon an externally defined list of `senses' for
+%% the term. Instead this method uses a huge list of 5grams as a corpus
+%% which can be exploited to deduce the relationship between the sense of
+%% a term given its context as explained earlier.
+
+%% \section{The algorithm}
+%% We follow the algorithm used in \cite{navigli} which uses the Google
+%% Web1T corpus as the source of 5grams. We however tried to adopt the
+%% freely available Google Books Ngram dataset. It consists of all those
+%% 5grams (which appear with a frequency greater than 40) along with
+%% their frequencies in the Google Books.
+%% \begin{itemize}
+%%   \item Given an ambiguous query $q$, a {\it co-occurrence graph}
+%%     $G_q(V,E)$ is built such that $V$ is the set of terms related to
+%%     the query terms $q$ and $E$ is the set of weighted edges, each
+%%     denoting the strength of co-occurrence between the terms.
+%%   \item The set of co-occurring terms $V$ is determined from the
+%%     5gram corpus as follows:
+%%     \begin{itemize}
+%%       \item Initially $V_0$ contains all the non-stop words of the
+%%         search result snippets. We then add all those words $w$ to
+%%         $V_0$ which have a `strong' co-occurrence relation ship with
+%%         query $q$ which is determined by the Dice co-efficient defined
+%%         as follows:
+%%         \begin{equation*}
+%%           Dice(q,w) = \frac{2c(w,q)}{c(w) + c(q)}
+%%         \end{equation*}
+%%         $w$ is added only if $Dice(q,w) \ge 0.0033$
+%%       \item The previous step is repeated for each of the $w \in
+%%         V_0$. That is we now add all those $w^\prime$ which have Dice
+%%         greater than the threshold for each of $w$ to get the final
+%%         $V$.
+%%       \item All disconnected vertices are then removed.
+%%     \end{itemize}
+%%      \item The primary hypothesis of the algorithm is that all the
+%%         terms belonging to the same sense are more likely to form
+%%         cycles of length 4 in the co-occurrence graph.
+%%      \item Thus for each edge we measure its importance to any of the
+%%         senses by looking at the `squares' it participates in. It is
+%%         numerically estimated as:
+%%       \begin{equation*}
+%%           Sqr(e) = \frac{\mbox{no. of squares $e$
+%%               participates in}}{\mbox{no. of squares $e$ could
+%%               participate in}}
+%%        \end{equation*}
+%%      \item Finally all those edges are removed whose $Sqr(e)$ value
+%%         is less than a threshold (0.45) to get a set of connected
+%%         components which correspond to various senses the ambiguous
+%%         term intends.
+%%      \item We assign each of the search result snippets to one of the
+%%        connected components using the number of common words as the
+%%        criterion. 
+%% \end{itemize}
+
+%% \subsection{Implementation and results}
+%% We implemented the algorithm as described above and verified that it
+%% works on small example co-occurrence graphs. We found out that the
+%% resultant connected components of terms we obtained were not useful
+%% for our present task of classifying search results. 
+
+%% When we ran the system with the input query `Beagle' we obtained a set
+%% of connected components some of which are shown below:
+%% \begin{verbatim}
+%% [chairman, radiologi, ophthalmologi, materia, zoologi, anatomi, pssri,
+%%   rhetor, pilling, grate, dean, neurologi, pathologi, surgeri,
+%%   physiologi, yale, regiu, geologi, botani, emeritu, sociologi,
+%%   professor, pediatr, obstetr, adjunct]
+
+%% [maxwel, seren, odor, melodi, singer, bye, savour, savor, sweet, bet,
+%%  concord, perfum, potato, odour, Beagl]
+
+%% [erlbaum, anthropolog, psychoanalyt, collegi, lawrenc, dental, apa,
+%%  associ, southeast, dietet, nj, officiali, geologist]
+
+%% [rightli, judg, bench, dissent, condemn]
+
+%% [lookout, forecastl, shackleford, masthead, seashor]
+
+%% \end{verbatim}
+
+%%  We can see that while the clusters consist of various related groups
+%%  of words, they are not necessarily relevant to the word ``beagle". For
+%%  example, we have in one cluster, the words ``radiology, zoology,
+%%  anatomy, ophthalmology" etc. but they are not in anyway relevant to
+%%  our query.
+
+%% The problem arises mainly because of the first step of the algorithm,
+%% in which, we add all the words of result snippets to the initial
+%% vertex set of the co-occurrence graph. The program then goes on to
+%% retrieve all those words which co-occur with a high frequency with
+%% these snippet words. If the snippet consisted of a word `zoology'
+%% (perhaps in describing the Darwin's trip on HMS Beagle during which he
+%% observed various species on South American coast), the algorithm
+%% proceeds to add all those words which have co-occurred with it in the
+%% Data Set, thus forming a very strong `loopy' connected component of
+%% terms related to zoology like, botany, anatomy, ophthalmology
+%% etc. Thus we get this cluster in the output which is not in anyway
+%% relevant to the query.
+
+%% We also note one further limitation of my implementation which is that
+%% the Data used in forming the co-occurrence graph is from two very
+%% different sources.
+%% \begin{itemize}
+%% \item The initial vertex set consisted of words extracted from result snippets
+%% which are from the Web.
+%% \item The co-occurring words added to the graph are extracted from the Ngram
+%% dataset we prepared from the Google Books data. 
+%% \end{itemize}
+%% Most of the emphasis on the web results was on the sense ``a breed of dog"
+%% whereas most of the high co-occurrences of the word `beagle' in the Google
+%% Books Dataset were in the sense `HMS Beagle' that Darwin sailed on.
+
+%% \chapter {Conclusion and future work}
+%% We discussed the algorithm, implementation and performance of two
+%% moderately successful knowledge based systems to classify search
+%% results of ambiguous query terms. We also discussed a corpus based
+%% method which did not perform as expected due to the fundamental
+%% mismatch between the origin of corpus data (Google Books) and the
+%% origin of search results (Web).
+
+%% In the next stage of the project we intend to further improve the
+%% performance of the knowledge based systems as follows:
+
+%% \begin{itemize}
+%%   \item Incorporating the information from corpus based co-occurrences
+%%     to improve the association between search results and senses. 
+%%   \item Utilizing the category information of Wikipedia while
+%%     associating a particular sense. For an example consider the
+%%     classification of following search result obtained as a result for
+%%     the ambiguous query {\tt Beagle}.
+    
+%%     \begin{verbatim}
+%%       Welcome to Beagle++ Beagle++ now makes that search semantic,
+%%       features you never ... At the L3S Research Center Beagle was
+%%       extended towards a Distributed Desktop Search.
+%%     \end{verbatim}
+    
+%%     This search result was misclassified under {\tt Beagle dog} by our
+%%     DBPedia system whereas it should have been associated to {\tt
+%%       Beagle linux software}. This happens because of the lack of
+%%     keywords associated with linux software sense (such as {\it gnome,
+%%       linux, indexing etc.}) in this particular search result. We hope
+%%     to address this problem using category structure by devising a way
+%%     to recognize that terms such as {\tt research, semantic, desktop}
+%%     essentially correlate more with the {\tt linux software} sense
+%%     rather than {\tt dog} sense.
+
+%% \end{itemize}
+
+ \bibliographystyle{plain}
+ \bibliography{Ref}
+
+
+
+
+
+\end{document}
